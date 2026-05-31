@@ -113,12 +113,28 @@ export class GuestI18nService {
         keys.forEach((key, index) => {
           mapped[key] = translated[index] ?? BASE_TEXTS[key];
         });
-        const complete = { ...BASE_TEXTS, ...(FALLBACK_TEXTS[lang] ?? {}), ...mapped };
+        const fallback = FALLBACK_TEXTS[lang] ?? {};
+        const complete: Record<string, string> = { ...BASE_TEXTS };
+        Object.entries(fallback).forEach(([key, value]) => {
+          if (value) {
+            complete[key] = value;
+          }
+        });
+        Object.entries(mapped).forEach(([key, value]) => {
+          complete[key] = value;
+        });
         this.cache.set(lang, complete);
         this.labels = complete;
       },
       error: () => {
-        this.labels = { ...BASE_TEXTS, ...(FALLBACK_TEXTS[lang] ?? {}) };
+        const fallback = FALLBACK_TEXTS[lang] ?? {};
+        const complete: Record<string, string> = { ...BASE_TEXTS };
+        Object.entries(fallback).forEach(([key, value]) => {
+          if (value) {
+            complete[key] = value;
+          }
+        });
+        this.labels = complete;
       }
     });
   }

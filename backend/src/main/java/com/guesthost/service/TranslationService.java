@@ -5,14 +5,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TranslationService {
+    private static final Pattern LANGUAGE_PATTERN = Pattern.compile("^[a-zA-Z-]{2,10}$");
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -21,17 +28,26 @@ public class TranslationService {
     private String apiKey;
 
     public String translate(String text, String targetLang) {
-        if (text == null || text.isBlank() || targetLang == null || targetLang.isBlank() || apiKey == null || apiKey.isBlank()) {
+        if (text == null || text.isBlank()
+                || targetLang == null
+                || targetLang.isBlank()
+                || !LANGUAGE_PATTERN.matcher(targetLang).matches()
+                || apiKey == null
+                || apiKey.isBlank()) {
             return text;
         }
         try {
             String url = UriComponentsBuilder.fromHttpUrl("https://translation.googleapis.com/language/translate/v2")
-                    .queryParam("q", text)
-                    .queryParam("target", targetLang)
                     .queryParam("key", apiKey)
                     .build(true)
                     .toUriString();
-            String response = restTemplate.getForObject(url, String.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            Map<String, String> payload = Map.of(
+                    "q", text,
+                    "target", targetLang
+            );
+            String response = restTemplate.postForObject(url, new HttpEntity<>(payload, headers), String.class);
             JsonNode root = objectMapper.readTree(response);
             JsonNode translated = root.path("data").path("translations").path(0).path("translatedText");
             return translated.isMissingNode() ? text : translated.asText(text);
