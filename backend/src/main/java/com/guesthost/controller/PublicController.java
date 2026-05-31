@@ -5,6 +5,8 @@ import com.guesthost.model.Booking;
 import com.guesthost.model.Property;
 import com.guesthost.repository.BookingRepository;
 import com.guesthost.repository.PropertyRepository;
+import com.guesthost.service.GuestAccessTokenService;
+import com.guesthost.service.TranslationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +22,15 @@ public class PublicController {
 
     private final PropertyRepository propertyRepository;
     private final BookingRepository bookingRepository;
+    private final GuestAccessTokenService guestAccessTokenService;
+    private final TranslationService translationService;
 
     @GetMapping("/api/public/properties/{propertyId}")
-    public ResponseEntity<Property> getProperty(@PathVariable String propertyId) {
+    public ResponseEntity<Property> getProperty(@PathVariable String propertyId,
+                                                @RequestParam(required = false) String lang) {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found: " + propertyId));
-        return ResponseEntity.ok(property);
+        return ResponseEntity.ok(localizeProperty(property, lang));
     }
 
     @GetMapping("/api/public/bookings/{bookingId}")
@@ -60,6 +65,58 @@ public class PublicController {
                 .filter(b -> normalizeLastName(b.getGuestName()).equals(normalizedLastName))
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found for provided credentials"));
         return ResponseEntity.ok(booking);
+    }
+
+    @GetMapping("/api/public/properties/{propertyId}/bookings/access-token")
+    public ResponseEntity<Booking> getBookingByAccessToken(@PathVariable String propertyId,
+                                                           @RequestParam String token) {
+        String bookingId = guestAccessTokenService.resolveBookingId(propertyId, token)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found for provided access token"));
+        Booking booking = bookingRepository.findById(bookingId)
+                .filter(b -> propertyId.equals(b.getPropertyId()))
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found for provided access token"));
+        return ResponseEntity.ok(booking);
+    }
+
+    private Property localizeProperty(Property property, String language) {
+        if (language == null || language.isBlank() || "en".equalsIgnoreCase(language) || property.getFaqList() == null) {
+            return property;
+        }
+        return Property.builder()
+                .id(property.getId())
+                .hostId(property.getHostId())
+                .name(property.getName())
+                .address(property.getAddress())
+                .wifiName(property.getWifiName())
+                .wifiPassword(property.getWifiPassword())
+                .airbnbReviewUrl(property.getAirbnbReviewUrl())
+                .bookingReviewUrl(property.getBookingReviewUrl())
+                .icalUrls(property.getIcalUrls())
+                .checkoutChecklist(property.getCheckoutChecklist())
+                .faqList(property.getFaqList().stream()
+                        .map(item -> localizeFaq(item, language))
+                        .toList())
+                .mapMarkers(property.getMapMarkers())
+                .quickContacts(property.getQuickContacts())
+                .customDomain(property.getCustomDomain())
+                .build();
+    }
+
+    private Property.FaqItem localizeFaq(Property.FaqItem item, String language) {
+        if (!"cs".equalsIgnoreCase(language)) {
+            return Property.FaqItem.builder()
+                    .question(translationService.translate(item.getQuestion(), language))
+                    .answer(translationService.translate(item.getAnswer(), language))
+                    .questionCs(item.getQuestionCs())
+                    .answerCs(item.getAnswerCs())
+                    .build();
+        }
+        return Property.FaqItem.builder()
+                .question((item.getQuestionCs() != null && !item.getQuestionCs().isBlank()) ? item.getQuestionCs() : item.getQuestion())
+                .answer((item.getAnswerCs() != null && !item.getAnswerCs().isBlank()) ? item.getAnswerCs() : item.getAnswer())
+                .questionCs(item.getQuestionCs())
+                .answerCs(item.getAnswerCs())
+                .build();
     }
 
     private String normalizeLastName(String name) {

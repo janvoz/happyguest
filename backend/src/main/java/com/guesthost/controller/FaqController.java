@@ -6,6 +6,7 @@ import com.guesthost.service.PropertyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +41,7 @@ public class FaqController {
             @PathVariable String propertyId,
             @RequestBody List<Property.FaqItem> faqList) {
         Property property = propertyService.getOwnedProperty(authentication.getName(), propertyId);
-        property.setFaqList(faqList != null ? faqList : new ArrayList<>());
+        property.setFaqList(normalizeList(faqList));
         propertyRepository.save(property);
         return ResponseEntity.ok(property.getFaqList());
     }
@@ -51,8 +52,11 @@ public class FaqController {
             @PathVariable String propertyId,
             @RequestBody Property.FaqItem item) {
         Property property = propertyService.getOwnedProperty(authentication.getName(), propertyId);
+        if (!isValid(item)) {
+            return ResponseEntity.badRequest().build();
+        }
         List<Property.FaqItem> updated = new ArrayList<>(property.getFaqList());
-        updated.add(item);
+        updated.add(normalize(item));
         property.setFaqList(updated);
         propertyRepository.save(property);
         return ResponseEntity.ok(property.getFaqList());
@@ -69,7 +73,10 @@ public class FaqController {
         if (index < 0 || index >= updated.size()) {
             return ResponseEntity.badRequest().build();
         }
-        updated.set(index, item);
+        if (!isValid(item)) {
+            return ResponseEntity.badRequest().build();
+        }
+        updated.set(index, normalize(item));
         property.setFaqList(updated);
         propertyRepository.save(property);
         return ResponseEntity.ok(property.getFaqList());
@@ -89,5 +96,30 @@ public class FaqController {
         property.setFaqList(updated);
         propertyRepository.save(property);
         return ResponseEntity.ok(property.getFaqList());
+    }
+
+    private List<Property.FaqItem> normalizeList(List<Property.FaqItem> source) {
+        if (source == null) {
+            return new ArrayList<>();
+        }
+        return source.stream()
+                .filter(this::isValid)
+                .map(this::normalize)
+                .toList();
+    }
+
+    private boolean isValid(Property.FaqItem item) {
+        return item != null
+                && StringUtils.hasText(item.getQuestion())
+                && StringUtils.hasText(item.getAnswer());
+    }
+
+    private Property.FaqItem normalize(Property.FaqItem item) {
+        return Property.FaqItem.builder()
+                .question(item.getQuestion().trim())
+                .answer(item.getAnswer().trim())
+                .questionCs(item.getQuestionCs() != null ? item.getQuestionCs().trim() : null)
+                .answerCs(item.getAnswerCs() != null ? item.getAnswerCs().trim() : null)
+                .build();
     }
 }

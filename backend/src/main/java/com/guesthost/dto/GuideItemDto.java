@@ -15,6 +15,7 @@ public class GuideItemDto {
 
     @NotBlank(message = "Title is required")
     private String title;
+    private String titleCs;
 
     private String slug;
     private String contentMarkdown;

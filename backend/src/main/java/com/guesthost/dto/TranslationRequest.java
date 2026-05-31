@@ -1,5 +1,6 @@
 package com.guesthost.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -9,5 +10,6 @@ public class TranslationRequest {
     private String text;
 
     @NotBlank(message = "Target language is required")
+    @JsonAlias({"lang", "language"})
     private String targetLanguage;
 }

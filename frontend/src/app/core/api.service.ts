@@ -24,6 +24,7 @@ export interface GuestRegistrationDto {
   propertyId: string;
   guests: Array<Pick<GuestRegistration, 'fullName' | 'dateOfBirth' | 'citizenship' | 'documentNumber' | 'address'>>;
 }
+
 export interface ReviewDto {
   bookingId: string;
   rating: number;
@@ -80,6 +81,10 @@ export interface UbyportSubmitResponse {
   message: string;
 }
 
+export interface TranslationBatchResponse {
+  translatedTexts: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -100,8 +105,10 @@ export class ApiService {
     return this.http.get<Property>(`${this.hostUrl}/properties/${id}`);
   }
 
-  getPublicProperty(propertyId: string): Observable<Property> {
-    return this.http.get<Property>(`${this.publicUrl}/properties/${propertyId}`);
+  getPublicProperty(propertyId: string, lang?: string): Observable<Property> {
+    return this.http.get<Property>(`${this.publicUrl}/properties/${propertyId}`, {
+      params: lang ? { lang } : {}
+    });
   }
 
   createProperty(dto: PropertyDto): Observable<Property> {
@@ -134,6 +141,12 @@ export class ApiService {
         reference,
         lastName
       }
+    });
+  }
+
+  getBookingByAccessToken(propertyId: string, token: string): Observable<Booking> {
+    return this.http.get<Booking>(`${this.publicUrl}/properties/${propertyId}/bookings/access-token`, {
+      params: { token }
     });
   }
 
@@ -205,12 +218,16 @@ export class ApiService {
     return this.http.delete<void>(`${this.hostUrl}/guides/${id}`);
   }
 
-  getPublicGuides(propertyId: string): Observable<GuideItem[]> {
-    return this.http.get<GuideItem[]>(`${this.publicUrl}/properties/${propertyId}/guides`);
+  getPublicGuides(propertyId: string, lang?: string): Observable<GuideItem[]> {
+    return this.http.get<GuideItem[]>(`${this.publicUrl}/properties/${propertyId}/guides`, {
+      params: lang ? { lang } : {}
+    });
   }
 
-  getPublicGuide(propertyId: string, slug: string): Observable<GuideItem> {
-    return this.http.get<GuideItem>(`${this.publicUrl}/properties/${propertyId}/guides/${slug}`);
+  getPublicGuide(propertyId: string, slug: string, lang?: string): Observable<GuideItem> {
+    return this.http.get<GuideItem>(`${this.publicUrl}/properties/${propertyId}/guides/${slug}`, {
+      params: lang ? { lang } : {}
+    });
   }
 
   getMinibarItems(propertyId: string): Observable<MinibarItem[]> {
@@ -278,9 +295,16 @@ export class ApiService {
   }
 
   translate(text: string, lang: string): Observable<string> {
-    return this.http.post<{ translatedText?: string } | string>(`${this.guestUrl}/translate`, { text, lang }).pipe(
+    return this.http.post<{ translatedText?: string } | string>(`${this.guestUrl}/translate`, { text, targetLanguage: lang }).pipe(
       map((response) => typeof response === 'string' ? response : response.translatedText ?? text)
     );
+  }
+
+  translateBatch(texts: string[], lang: string): Observable<string[]> {
+    return this.http.post<TranslationBatchResponse>(`${this.publicUrl}/translate/batch`, {
+      texts,
+      targetLanguage: lang
+    }).pipe(map((response) => response.translatedTexts ?? texts));
   }
 
   subscribePlan(tier: 'FREE' | 'STANDARD' | 'PRO'): Observable<string> {
@@ -343,6 +367,10 @@ export class ApiService {
 
   getPortalQr(propertyId: string): Observable<import('../shared/models').PortalQrResponse> {
     return this.http.get<import('../shared/models').PortalQrResponse>(`${this.hostUrl}/properties/${propertyId}/portal-qr`);
+  }
+
+  downloadWelcomeSheetPdf(propertyId: string): Observable<Blob> {
+    return this.http.get(`${this.hostUrl}/properties/${propertyId}/welcome-sheet.pdf`, { responseType: 'blob' });
   }
 
   private buildDateParams(from?: string, to?: string): Record<string, string> {

@@ -1,7 +1,7 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
 
 import { AuthService } from '../../core/auth.service';
@@ -19,15 +19,15 @@ export class DashboardComponent implements OnInit {
   @ViewChild(MatSidenav) sidenav?: MatSidenav;
 
   readonly navItems = [
-    { label: 'Properties', icon: 'home_work', tabIndex: 0 },
-    { label: 'Bookings', icon: 'event', tabIndex: 1 },
-    { label: 'Logbook', icon: 'description', tabIndex: 2, requiredFeature: 'LEGAL_LOGBOOK' },
-    { label: 'Guides', icon: 'menu_book', tabIndex: 3 },
-    { label: 'FAQ', icon: 'quiz', tabIndex: 4 },
-    { label: 'Minibar', icon: 'local_bar', tabIndex: 5, requiredFeature: 'MINIBAR' },
-    { label: 'Templates', icon: 'mark_email_read', tabIndex: 6, requiredFeature: 'CUSTOM_TEMPLATES' },
-    { label: 'Finances & Billing', icon: 'payments', tabIndex: 7 },
-    { label: 'Messages', icon: 'chat', tabIndex: 8, isGlobal: true, requiredFeature: 'TWO_WAY_CHAT' }
+    { labelKey: 'property', icon: 'home_work', tabIndex: 0 },
+    { labelKey: 'bookings', icon: 'event', tabIndex: 1 },
+    { labelKey: 'logbook', icon: 'description', tabIndex: 2, requiredFeature: 'LEGAL_LOGBOOK' },
+    { labelKey: 'guides', icon: 'menu_book', tabIndex: 3 },
+    { labelKey: 'faq', icon: 'quiz', tabIndex: 4 },
+    { labelKey: 'minibar', icon: 'local_bar', tabIndex: 5, requiredFeature: 'MINIBAR' },
+    { labelKey: 'templates', icon: 'mark_email_read', tabIndex: 6, requiredFeature: 'CUSTOM_TEMPLATES' },
+    { labelKey: 'finances', icon: 'payments', tabIndex: 7 },
+    { labelKey: 'messages', icon: 'chat', tabIndex: 8, isGlobal: true, requiredFeature: 'TWO_WAY_CHAT' }
   ];
   availableFeatures = new Set<string>();
   properties: Property[] = [];
@@ -44,7 +44,7 @@ export class DashboardComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly currentPropertyService: CurrentPropertyService,
     private readonly subscriptionFeatureService: SubscriptionFeatureService,
-    private readonly router: Router,
+    private readonly snackBar: MatSnackBar,
     readonly i18n: HostI18nService,
   ) {}
 
@@ -81,10 +81,22 @@ export class DashboardComponent implements OnInit {
     this.i18n.setLang(lang);
   }
 
-  printWelcomeSign(): void {
-    if (this.selectedPropertyId) {
-      void this.router.navigate(['/host/welcome-sign', this.selectedPropertyId]);
+  generateWelcomeSheetPdf(): void {
+    if (!this.selectedPropertyId) {
+      return;
     }
+    this.apiService.downloadWelcomeSheetPdf(this.selectedPropertyId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `welcome-sheet-${this.selectedPropertyId}.pdf`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.snackBar.open(this.i18n.t('welcomePdfReady'), 'OK', { duration: 2500 });
+      },
+      error: () => this.snackBar.open(this.i18n.t('welcomePdfError'), 'OK', { duration: 3000 })
+    });
   }
 
   refreshUnreadCount(): void {

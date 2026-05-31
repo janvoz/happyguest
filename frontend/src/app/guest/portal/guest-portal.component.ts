@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ApiService } from '../../core/api.service';
 import { Booking, Property } from '../../shared/models';
+import { GuestI18nService, GuestLang } from '../../core/guest-i18n.service';
 
 @Component({
   selector: 'app-guest-portal',
@@ -12,12 +13,6 @@ import { Booking, Property } from '../../shared/models';
 })
 export class GuestPortalComponent implements OnInit {
   readonly bookingReferenceForm: FormGroup;
-  readonly labels: Record<string, { title: string; subtitle: string; bookingRef: string; lastName: string; continue: string }> = {
-    en: { title: 'Enter your booking reference', subtitle: 'Use your booking reference and last name to unlock access.', bookingRef: 'Booking reference', lastName: 'Last name', continue: 'Continue' },
-    cs: { title: 'Zadejte referenci rezervace', subtitle: 'Pro odemčení přístupu použijte číslo rezervace a příjmení.', bookingRef: 'Reference rezervace', lastName: 'Příjmení', continue: 'Pokračovat' },
-    de: { title: 'Buchungsreferenz eingeben', subtitle: 'Nutzen Sie Referenz und Nachnamen für den Zugang.', bookingRef: 'Buchungsreferenz', lastName: 'Nachname', continue: 'Weiter' },
-    pl: { title: 'Wpisz numer rezerwacji', subtitle: 'Użyj numeru rezerwacji i nazwiska, aby uzyskać dostęp.', bookingRef: 'Numer rezerwacji', lastName: 'Nazwisko', continue: 'Dalej' }
-  };
   propertyId = '';
   bookingId = '';
   property: Property | null = null;
@@ -25,13 +20,14 @@ export class GuestPortalComponent implements OnInit {
   showRegistrationForm = false;
   isLoading = true;
   faqSearchTerm = '';
-  selectedLanguage: 'en' | 'cs' | 'de' | 'pl' = 'en';
+  selectedLanguage: GuestLang = 'en';
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly apiService: ApiService,
     private readonly fb: FormBuilder,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    readonly i18n: GuestI18nService
   ) {
     this.bookingReferenceForm = this.fb.group({
       bookingReference: ['', Validators.required],
@@ -40,22 +36,32 @@ export class GuestPortalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const language = (navigator.language || 'en').slice(0, 2).toLowerCase();
-    this.selectedLanguage = ['cs', 'de', 'pl'].includes(language) ? language as 'cs' | 'de' | 'pl' : 'en';
+    this.selectedLanguage = this.i18n.initializeFromBrowserLanguage();
 
     this.route.paramMap.subscribe((params) => {
       this.propertyId = params.get('propertyId') ?? '';
       this.loadProperty();
+      this.handleAccessQuery(this.route.snapshot.queryParamMap);
     });
 
     this.route.queryParamMap.subscribe((params) => {
-      this.bookingId = params.get('bookingId') ?? '';
-      if (this.bookingId) {
-        this.loadBooking(this.bookingId);
-      } else {
-        this.isLoading = false;
-      }
+      this.handleAccessQuery(params);
     });
+  }
+
+  private handleAccessQuery(params: ParamMap): void {
+    if (!this.propertyId) {
+      return;
+    }
+    const token = params.get('token') ?? '';
+    this.bookingId = params.get('bookingId') ?? '';
+    if (token) {
+      this.loadBookingByToken(token);
+    } else if (this.bookingId) {
+      this.loadBooking(this.bookingId);
+    } else {
+      this.isLoading = false;
+    }
   }
 
   submitBookingReference(): void {
@@ -78,11 +84,13 @@ export class GuestPortalComponent implements OnInit {
     if (this.booking) {
       this.booking = { ...this.booking, isRegistrationCompleted: true };
     }
-    this.snackBar.open('Registration completed. Your stay details are now unlocked.', 'Dismiss', { duration: 4000 });
+    this.snackBar.open(this.i18n.t('registrationDone'), 'Dismiss', { duration: 4000 });
   }
 
-  setLanguage(language: 'en' | 'cs' | 'de' | 'pl'): void {
+  setLanguage(language: GuestLang): void {
     this.selectedLanguage = language;
+    this.i18n.setLanguage(language);
+    this.loadProperty();
   }
 
   /** Returns a Material icon name appropriate for the contact label. */
@@ -96,15 +104,11 @@ export class GuestPortalComponent implements OnInit {
     return 'phone';
   }
 
-  get filteredFaqList() {
-    const faqs = this.property?.faqList ?? [];
-    const term = this.faqSearchTerm.trim().toLowerCase();
-    if (!term) {
-      return faqs;
+  format(text: string): string {
+    if (text.includes('{{name}}') && this.booking?.guestName) {
+      return text.replace('{{name}}', this.booking.guestName);
     }
-    return faqs.filter((faq) =>
-      faq.question.toLowerCase().includes(term) || faq.answer.toLowerCase().includes(term)
-    );
+    return text;
   }
 
   private loadProperty(): void {
@@ -112,7 +116,7 @@ export class GuestPortalComponent implements OnInit {
       return;
     }
 
-    this.apiService.getPublicProperty(this.propertyId).subscribe({
+    this.apiService.getPublicProperty(this.propertyId, this.selectedLanguage).subscribe({
       next: (property) => {
         this.property = property;
       },
@@ -137,7 +141,23 @@ export class GuestPortalComponent implements OnInit {
       error: () => {
         this.booking = null;
         this.isLoading = false;
-        this.snackBar.open('Booking reference not found. Please try again.', 'Dismiss', { duration: 4000 });
+        this.snackBar.open(this.i18n.t('bookingNotFound'), 'Dismiss', { duration: 4000 });
+      }
+    });
+  }
+
+  private loadBookingByToken(token: string): void {
+    this.isLoading = true;
+    this.apiService.getBookingByAccessToken(this.propertyId, token).subscribe({
+      next: (booking) => {
+        this.booking = booking;
+        this.bookingId = booking.id;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.booking = null;
+        this.bookingId = '';
+        this.isLoading = false;
       }
     });
   }

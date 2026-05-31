@@ -26,6 +26,7 @@ public class NotificationService {
     private final PropertyRepository propertyRepository;
     private final JavaMailSender javaMailSender;
     private final EmailTemplateRenderService emailTemplateRenderService;
+    private final GuestAccessTokenService guestAccessTokenService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -92,7 +93,8 @@ public class NotificationService {
             return false;
         }
 
-        String link = frontendUrl + "/guest/portal/" + booking.getPropertyId() + "?bookingId=" + booking.getId();
+        String accessToken = guestAccessTokenService.generatePortalToken(booking);
+        String link = frontendUrl + "/guest/portal/" + booking.getPropertyId() + "?token=" + accessToken;
         Property property = propertyRepository.findById(booking.getPropertyId()).orElse(null);
         String fallbackBody = "<html><body><h2>Action Required: Complete Registration to Get Your Door Code</h2>"
                 + "<p>Please complete your registration before arrival to receive your door code.</p>"

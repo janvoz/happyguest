@@ -1,153 +1,19 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 
 export type HostLang = 'en' | 'cs';
 
-const LABELS: Record<HostLang, Record<string, string>> = {
-  en: {
-    dashboard: 'Dashboard',
-    bookings: 'Bookings',
-    logbook: 'Logbook',
-    guides: 'Guides',
-    faq: 'FAQ',
-    maps: 'Maps',
-    finances: 'Finances',
-    messages: 'Messages',
-    templates: 'Templates',
-    minibar: 'Minibar',
-    settings: 'Settings',
-    logout: 'Logout',
-    property: 'Property',
-    addBooking: 'Add Booking',
-    editBooking: 'Edit Booking',
-    deleteBooking: 'Delete Booking',
-    guestName: 'Guest Name',
-    guestEmail: 'Guest Email',
-    checkIn: 'Check-in',
-    checkOut: 'Check-out',
-    doorCode: 'Door Code',
-    addProperty: 'Add Property',
-    editProperty: 'Edit Property',
-    deleteProperty: 'Delete Property',
-    propertyName: 'Property Name',
-    address: 'Address',
-    wifiName: 'Wi-Fi Name',
-    wifiPassword: 'Wi-Fi Password',
-    save: 'Save',
-    cancel: 'Cancel',
-    delete: 'Delete',
-    add: 'Add',
-    edit: 'Edit',
-    search: 'Search',
-    noData: 'No data found.',
-    addFaq: 'Add FAQ',
-    editFaq: 'Edit FAQ',
-    question: 'Question (EN)',
-    answer: 'Answer (EN)',
-    questionCs: 'Question (CS)',
-    answerCs: 'Answer (CS)',
-    addGuide: 'Add Guide',
-    editGuide: 'Edit Guide',
-    guideTitle: 'Title',
-    contentEn: 'Content (EN / Markdown)',
-    contentCs: 'Content (CS / Markdown)',
-    uploadMedia: 'Upload Image / PDF / Video',
-    welcomeSign: 'Print Welcome Sign',
-    printWelcomeSign: 'Print Welcome Sign',
-    language: 'Language',
-    english: 'English',
-    czech: 'Czech',
-    sendInvite: 'Send Invite',
-    sendPreArrival: 'Send Pre-Arrival',
-    sendPostDeparture: 'Send Post-Departure',
-    exportCsv: 'Export CSV',
-    exportUbyport: 'Export Ubyport XML',
-    tier: 'Subscription Tier',
-    iban: 'IBAN',
-    swift: 'BIC / SWIFT',
-    minibarItems: 'Minibar Items',
-    orders: 'Orders',
-    price: 'Price (CZK)',
-    stock: 'Stock',
-    total: 'Total',
-    status: 'Status',
-    paidAt: 'Created At',
-  },
-  cs: {
-    dashboard: 'Přehled',
-    bookings: 'Rezervace',
-    logbook: 'Kniha hostů',
-    guides: 'Průvodci',
-    faq: 'Časté dotazy',
-    maps: 'Mapy',
-    finances: 'Finance',
-    messages: 'Zprávy',
-    templates: 'Šablony',
-    minibar: 'Minibar',
-    settings: 'Nastavení',
-    logout: 'Odhlásit',
-    property: 'Nemovitost',
-    addBooking: 'Přidat rezervaci',
-    editBooking: 'Upravit rezervaci',
-    deleteBooking: 'Smazat rezervaci',
-    guestName: 'Jméno hosta',
-    guestEmail: 'E-mail hosta',
-    checkIn: 'Příjezd',
-    checkOut: 'Odjezd',
-    doorCode: 'Kód dveří',
-    addProperty: 'Přidat nemovitost',
-    editProperty: 'Upravit nemovitost',
-    deleteProperty: 'Smazat nemovitost',
-    propertyName: 'Název nemovitosti',
-    address: 'Adresa',
-    wifiName: 'Název Wi-Fi',
-    wifiPassword: 'Heslo Wi-Fi',
-    save: 'Uložit',
-    cancel: 'Zrušit',
-    delete: 'Smazat',
-    add: 'Přidat',
-    edit: 'Upravit',
-    search: 'Hledat',
-    noData: 'Žádná data.',
-    addFaq: 'Přidat FAQ',
-    editFaq: 'Upravit FAQ',
-    question: 'Otázka (EN)',
-    answer: 'Odpověď (EN)',
-    questionCs: 'Otázka (CS)',
-    answerCs: 'Odpověď (CS)',
-    addGuide: 'Přidat průvodce',
-    editGuide: 'Upravit průvodce',
-    guideTitle: 'Název',
-    contentEn: 'Obsah (EN / Markdown)',
-    contentCs: 'Obsah (CS / Markdown)',
-    uploadMedia: 'Nahrát obrázek / PDF / Video',
-    welcomeSign: 'Tisknout uvítací ceduli',
-    printWelcomeSign: 'Tisknout uvítací ceduli',
-    language: 'Jazyk',
-    english: 'Angličtina',
-    czech: 'Čeština',
-    sendInvite: 'Odeslat pozvánku',
-    sendPreArrival: 'Odeslat před příjezdem',
-    sendPostDeparture: 'Odeslat po odjezdu',
-    exportCsv: 'Export CSV',
-    exportUbyport: 'Export Ubyport XML',
-    tier: 'Plán předplatného',
-    iban: 'IBAN',
-    swift: 'BIC / SWIFT',
-    minibarItems: 'Položky minibaru',
-    orders: 'Objednávky',
-    price: 'Cena (Kč)',
-    stock: 'Sklad',
-    total: 'Celkem',
-    status: 'Stav',
-    paidAt: 'Vytvořeno',
-  }
-};
-
 @Injectable({ providedIn: 'root' })
 export class HostI18nService {
-  private readonly _lang$ = new BehaviorSubject<HostLang>('en');
+  private readonly _lang$ = new BehaviorSubject<HostLang>((localStorage.getItem('host-lang') as HostLang) || 'en');
   readonly lang$ = this._lang$.asObservable();
+
+  constructor(private readonly translate: TranslateService) {
+    this.translate.addLangs(['en', 'cs']);
+    this.translate.setDefaultLang('en');
+    this.translate.use(`host-${this._lang$.value}`);
+  }
 
   get currentLang(): HostLang {
     return this._lang$.getValue();
@@ -155,9 +21,11 @@ export class HostI18nService {
 
   setLang(lang: HostLang): void {
     this._lang$.next(lang);
+    localStorage.setItem('host-lang', lang);
+    this.translate.use(`host-${lang}`);
   }
 
   t(key: string): string {
-    return LABELS[this.currentLang][key] ?? LABELS['en'][key] ?? key;
+    return this.translate.instant(key) || key;
   }
 }

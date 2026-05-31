@@ -8,9 +8,12 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.guesthost.dto.PropertyDto;
 import com.guesthost.model.Property;
 import com.guesthost.service.PropertyService;
+import com.guesthost.service.WelcomeSheetPdfService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +36,7 @@ import java.util.Map;
 public class PropertyController {
 
     private final PropertyService propertyService;
+    private final WelcomeSheetPdfService welcomeSheetPdfService;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -74,6 +78,17 @@ public class PropertyController {
         String portalUrl = frontendUrl + "/guest/portal/" + id;
         String dataUrl = buildQrDataUrl(portalUrl);
         return ResponseEntity.ok(Map.of("qrDataUrl", dataUrl, "portalUrl", portalUrl));
+    }
+
+    @GetMapping(value = "/{id}/welcome-sheet.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> downloadWelcomeSheetPdf(Authentication authentication, @PathVariable String id) {
+        Property property = propertyService.getOwnedProperty(authentication.getName(), id);
+        String portalUrl = frontendUrl + "/guest/portal/" + id;
+        byte[] pdf = welcomeSheetPdfService.generate(property, portalUrl);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"welcome-sheet-" + id + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
     private String buildQrDataUrl(String content) {

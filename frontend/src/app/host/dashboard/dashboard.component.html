@@ -8,9 +8,9 @@
 
       <mat-nav-list class="!pt-2">
         <a mat-list-item *ngFor="let item of navItems" (click)="openTab(item.tabIndex)" class="!text-slate-200 hover:!bg-white/5" [class.hidden]="!isFeatureEnabled(item.requiredFeature)">
-          <mat-icon matListItemIcon class="!text-slate-200" [matBadge]="item.label === 'Messages' && unreadMessages ? unreadMessages : null" matBadgeColor="warn">{{ item.icon }}</mat-icon>
+          <mat-icon matListItemIcon class="!text-slate-200" [matBadge]="item.labelKey === 'messages' && unreadMessages ? unreadMessages : null" matBadgeColor="warn">{{ item.icon }}</mat-icon>
           <span matListItemTitle class="!text-slate-200">
-            {{ item.label }}
+            {{ i18n.t(item.labelKey) }}
             <span *ngIf="item.isGlobal" class="ml-1 text-[10px] uppercase tracking-wide text-slate-400">Global</span>
           </span>
         </a>
@@ -26,7 +26,7 @@
           </mat-select>
         </mat-form-field>
         <!-- Welcome sign button -->
-        <button mat-stroked-button class="!text-slate-200 !border-white/20" (click)="printWelcomeSign()" [disabled]="!selectedPropertyId">
+        <button mat-stroked-button class="!text-slate-200 !border-white/20" (click)="generateWelcomeSheetPdf()" [disabled]="!selectedPropertyId">
           <mat-icon>print</mat-icon> {{ i18n.t('welcomeSign') }}
         </button>
         <p class="text-xs text-slate-400">Guest experience automation for modern hosts.</p>

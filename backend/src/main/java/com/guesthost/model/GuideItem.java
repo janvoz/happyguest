@@ -22,6 +22,7 @@ public class GuideItem {
 
     private String propertyId;
     private String title;
+    private String titleCs;
     private String slug;
     private String contentMarkdown;
     private String videoUrl;

@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ApiService } from '../../../core/api.service';
+import { HostI18nService } from '../../../core/host-i18n.service';
 import { GuideItem } from '../../../shared/models';
 
 interface GuideDialogData {
@@ -28,10 +29,12 @@ export class GuideDialogComponent {
     @Inject(MAT_DIALOG_DATA) public readonly data: GuideDialogData,
     private readonly api: ApiService,
     private readonly snack: MatSnackBar,
+    readonly i18n: HostI18nService,
   ) {
     this.uploadedUrls = [...(this.data.guide?.photoUrls ?? [])];
     this.form = this.fb.group({
       title: [this.data.guide?.title ?? '', [Validators.required, Validators.minLength(2)]],
+      titleCs: [this.data.guide?.titleCs ?? ''],
       slug: [this.data.guide?.slug ?? '', Validators.required],
       contentMarkdown: [this.data.guide?.contentMarkdown ?? '', Validators.required],
       contentMarkdownCs: [this.data.guide?.contentMarkdownCs ?? ''],

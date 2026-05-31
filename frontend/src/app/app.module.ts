@@ -1,4 +1,5 @@
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -31,6 +32,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -67,6 +70,11 @@ import { TemplatesTabComponent } from './host/dashboard/templates-tab/templates-
 import { WelcomeSignComponent } from './host/welcome-sign/welcome-sign.component';
 import { MapComponent } from './shared/map/map.component';
 import { TruncatePipe } from './shared/pipes/truncate.pipe';
+import { FaqFilterPipe } from './shared/pipes/faq-filter.pipe';
+
+export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 
 @NgModule({
   declarations: [
@@ -100,6 +108,7 @@ import { TruncatePipe } from './shared/pipes/truncate.pipe';
     MapComponent,
     WelcomeSignComponent,
     TruncatePipe,
+    FaqFilterPipe,
     TemplatesTabComponent,
     TemplateDialogComponent
   ],
@@ -136,7 +145,14 @@ import { TruncatePipe } from './shared/pipes/truncate.pipe';
     MatBadgeModule,
     MatTooltipModule,
     MatAutocompleteModule,
-    MatExpansionModule
+    MatExpansionModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
+    })
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
