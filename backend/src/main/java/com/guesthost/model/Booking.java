@@ -34,5 +34,12 @@ public class Booking {
     @JsonProperty("isRegistrationCompleted")
     private boolean registrationCompleted;
 
-    private String source;
+    private String bookingRefNumber;
+    private BookingSource source;
+
+    public enum BookingSource {
+        AIRBNB,
+        BOOKING,
+        MANUAL
+    }
 }

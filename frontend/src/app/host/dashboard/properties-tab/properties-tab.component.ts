@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { ApiService, PropertyDto } from '../../../core/api.service';
+import { CurrentPropertyService } from '../../../core/current-property.service';
 import { Property } from '../../../shared/models';
 import { PropertyDialogComponent } from '../property-dialog/property-dialog.component';
 
@@ -18,6 +19,7 @@ export class PropertiesTabComponent implements OnInit {
 
   constructor(
     private readonly apiService: ApiService,
+    private readonly currentPropertyService: CurrentPropertyService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar
   ) {}
@@ -31,6 +33,7 @@ export class PropertiesTabComponent implements OnInit {
     this.apiService.getProperties().subscribe({
       next: (properties) => {
         this.dataSource.data = properties;
+        this.currentPropertyService.setProperties(properties);
         this.isLoading = false;
       },
       error: () => {

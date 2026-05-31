@@ -2,6 +2,7 @@ package com.guesthost.controller;
 
 import com.guesthost.dto.MinibarItemDto;
 import com.guesthost.model.MinibarItem;
+import com.guesthost.security.RequiresFeature;
 import com.guesthost.service.MinibarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,27 +25,32 @@ public class MinibarController {
 
     private final MinibarService minibarService;
 
+    @RequiresFeature("MINIBAR")
     @GetMapping("/api/host/properties/{propertyId}/minibar-items")
     public ResponseEntity<List<MinibarItem>> getItemsByProperty(Authentication authentication, @PathVariable String propertyId) {
         return ResponseEntity.ok(minibarService.getItemsForHost(authentication.getName(), propertyId));
     }
 
+    @RequiresFeature("MINIBAR")
     @GetMapping("/api/host/minibar")
     public ResponseEntity<List<MinibarItem>> getItems(Authentication authentication, @RequestParam String propertyId) {
         return ResponseEntity.ok(minibarService.getItemsForHost(authentication.getName(), propertyId));
     }
 
+    @RequiresFeature("MINIBAR")
     @PostMapping({"/api/host/minibar-items", "/api/host/minibar"})
     public ResponseEntity<MinibarItem> createItem(Authentication authentication, @Valid @RequestBody MinibarItemDto dto) {
         return ResponseEntity.ok(minibarService.createItem(authentication.getName(), dto));
     }
 
+    @RequiresFeature("MINIBAR")
     @PutMapping({"/api/host/minibar-items/{id}", "/api/host/minibar/{id}"})
     public ResponseEntity<MinibarItem> updateItem(Authentication authentication, @PathVariable String id,
                                                   @Valid @RequestBody MinibarItemDto dto) {
         return ResponseEntity.ok(minibarService.updateItem(authentication.getName(), id, dto));
     }
 
+    @RequiresFeature("MINIBAR")
     @DeleteMapping({"/api/host/minibar-items/{id}", "/api/host/minibar/{id}"})
     public ResponseEntity<Void> deleteItem(Authentication authentication, @PathVariable String id) {
         minibarService.deleteItem(authentication.getName(), id);

@@ -8,30 +8,24 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
-@Document(collection = "guest_registrations")
+@Document(collection = "chat_messages")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GuestRegistration {
+public class ChatMessage {
 
     @Id
     private String id;
 
     private String bookingId;
-    private String propertyId;
-    private String fullName;
-    private LocalDate dateOfBirth;
-    private String citizenship;
-    private String documentNumber;
-    private String address;
-    private UbyportStatus ubyportStatus;
+    private Sender sender;
+    private String messageText;
     private Instant createdAt;
 
-    public enum UbyportStatus {
-        PENDING,
-        SUBMITTED
+    public enum Sender {
+        GUEST,
+        HOST
     }
 }

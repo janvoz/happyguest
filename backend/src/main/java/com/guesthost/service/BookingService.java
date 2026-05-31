@@ -11,13 +11,16 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 public class BookingService {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final DateTimeFormatter REFERENCE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyMMdd");
 
     private final BookingRepository bookingRepository;
     private final PropertyService propertyService;
@@ -48,7 +51,8 @@ public class BookingService {
                 .preArrivalSent(false)
                 .postDepartureSent(false)
                 .registrationCompleted(false)
-                .source(dto.getSource() == null || dto.getSource().isBlank() ? "MANUAL" : dto.getSource())
+                .bookingRefNumber(resolveBookingReference(dto.getBookingRefNumber(), dto.getCheckIn()))
+                .source(resolveSource(dto.getSource()))
                 .build();
         return bookingRepository.save(booking);
     }
@@ -60,7 +64,12 @@ public class BookingService {
         existing.setGuestEmail(dto.getGuestEmail());
         existing.setCheckIn(dto.getCheckIn());
         existing.setCheckOut(dto.getCheckOut());
-        existing.setSource(dto.getSource() == null || dto.getSource().isBlank() ? existing.getSource() : dto.getSource());
+        if (dto.getBookingRefNumber() != null && !dto.getBookingRefNumber().isBlank()) {
+            existing.setBookingRefNumber(resolveBookingReference(dto.getBookingRefNumber(), dto.getCheckIn()));
+        }
+        if (dto.getSource() != null && !dto.getSource().isBlank()) {
+            existing.setSource(resolveSource(dto.getSource()));
+        }
         return bookingRepository.save(existing);
     }
 
@@ -84,13 +93,30 @@ public class BookingService {
                 .preArrivalSent(false)
                 .postDepartureSent(false)
                 .registrationCompleted(false)
-                .source(source)
+                .bookingRefNumber(resolveBookingReference(null, checkIn))
+                .source(resolveSource(source))
                 .build();
         return bookingRepository.save(booking);
     }
 
     public String generateDoorCode() {
         return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
+    }
+
+    private String resolveBookingReference(String proposedReference, LocalDateTime checkIn) {
+        if (proposedReference != null && !proposedReference.isBlank()) {
+            return proposedReference.trim().toUpperCase(Locale.ROOT);
+        }
+        String datePart = (checkIn == null ? LocalDateTime.now() : checkIn).format(REFERENCE_DATE_FORMAT);
+        int randomPart = 1000 + SECURE_RANDOM.nextInt(9000);
+        return "BK-" + datePart + "-" + randomPart;
+    }
+
+    private Booking.BookingSource resolveSource(String source) {
+        if (source == null || source.isBlank()) {
+            return Booking.BookingSource.MANUAL;
+        }
+        return Booking.BookingSource.valueOf(source.trim().toUpperCase(Locale.ROOT));
     }
 
     private void validateDates(LocalDateTime checkIn, LocalDateTime checkOut) {

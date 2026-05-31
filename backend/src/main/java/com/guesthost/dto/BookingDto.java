@@ -26,5 +26,6 @@ public class BookingDto {
     @NotNull(message = "Check-out is required")
     private LocalDateTime checkOut;
 
+    private String bookingRefNumber;
     private String source;
 }

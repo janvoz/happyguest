@@ -20,4 +20,5 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
     List<Booking> findAllByPostDepartureSentFalse();
     @Query("{ 'propertyId': ?0, 'checkIn': ?1 }")
     Optional<Booking> findByPropertyIdAndCheckIn(String propertyId, LocalDateTime checkIn);
+    Optional<Booking> findByPropertyIdAndBookingRefNumber(String propertyId, String bookingRefNumber);
 }

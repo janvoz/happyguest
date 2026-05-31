@@ -5,6 +5,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { ApiService } from '../../../core/api.service';
+import { CurrentPropertyService } from '../../../core/current-property.service';
 import { GuestRegistration, Property } from '../../../shared/models';
 
 @Component({
@@ -25,6 +26,7 @@ export class LogbookTabComponent implements OnInit, AfterViewInit {
 
   constructor(
     private readonly apiService: ApiService,
+    private readonly currentPropertyService: CurrentPropertyService,
     private readonly snackBar: MatSnackBar
   ) {
     this.dataSource.filterPredicate = (record, filter) => {
@@ -34,9 +36,11 @@ export class LogbookTabComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.apiService.getProperties().subscribe((properties) => {
+    this.currentPropertyService.properties$.subscribe((properties) => {
       this.properties = properties;
-      this.selectedPropertyId = properties[0]?.id ?? '';
+    });
+    this.currentPropertyService.selectedPropertyId$.subscribe((propertyId) => {
+      this.selectedPropertyId = propertyId;
       if (this.selectedPropertyId) {
         this.loadLogbook();
       }

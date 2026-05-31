@@ -6,13 +6,6 @@
 
   <div class="grid gap-4 xl:grid-cols-[220px_repeat(2,minmax(180px,1fr))_minmax(220px,1fr)_auto] xl:items-center">
     <mat-form-field appearance="outline">
-      <mat-label>Property</mat-label>
-      <mat-select [(value)]="selectedPropertyId" (selectionChange)="loadLogbook()">
-        <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
       <mat-label>From</mat-label>
       <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (dateChange)="loadLogbook()">
       <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>

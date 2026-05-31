@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { forkJoin } from 'rxjs';
 
 import { ApiService } from '../../../core/api.service';
 import { GuestMessage, Property } from '../../../shared/models';
@@ -11,7 +12,6 @@ import { GuestMessage, Property } from '../../../shared/models';
 export class MessagesTabComponent implements OnInit {
   readonly displayedColumns = ['guestName', 'messageType', 'content', 'rating', 'createdAt', 'read'];
   properties: Property[] = [];
-  selectedPropertyId = '';
   filterType = 'ALL';
   messages: GuestMessage[] = [];
   filteredMessages: GuestMessage[] = [];
@@ -25,20 +25,21 @@ export class MessagesTabComponent implements OnInit {
   ngOnInit(): void {
     this.apiService.getProperties().subscribe((properties) => {
       this.properties = properties;
-      this.selectedPropertyId = properties[0]?.id ?? '';
       this.loadMessages();
     });
   }
 
   loadMessages(): void {
-    if (!this.selectedPropertyId) {
+    if (!this.properties.length) {
       this.messages = [];
       this.filteredMessages = [];
       return;
     }
 
-    this.apiService.getMessages(this.selectedPropertyId).subscribe((messages) => {
-      this.messages = messages;
+    forkJoin(this.properties.map((property) => this.apiService.getMessages(property.id))).subscribe((groupedMessages) => {
+      this.messages = groupedMessages
+        .flat()
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       this.applyFilter();
     });
   }

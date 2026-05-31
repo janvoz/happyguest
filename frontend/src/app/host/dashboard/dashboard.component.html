@@ -7,9 +7,12 @@
       </div>
 
       <mat-nav-list class="!pt-2">
-        <a mat-list-item *ngFor="let item of navItems; let i = index" (click)="openTab(i)" class="!text-slate-200 hover:!bg-white/5">
+        <a mat-list-item *ngFor="let item of navItems" (click)="openTab(item.tabIndex)" class="!text-slate-200 hover:!bg-white/5" [class.hidden]="!isFeatureEnabled(item.requiredFeature)">
           <mat-icon matListItemIcon class="!text-slate-200" [matBadge]="item.label === 'Messages' && unreadMessages ? unreadMessages : null" matBadgeColor="warn">{{ item.icon }}</mat-icon>
-          <span matListItemTitle class="!text-slate-200">{{ item.label }}</span>
+          <span matListItemTitle class="!text-slate-200">
+            {{ item.label }}
+            <span *ngIf="item.isGlobal" class="ml-1 text-[10px] uppercase tracking-wide text-slate-400">Global</span>
+          </span>
         </a>
       </mat-nav-list>
 
@@ -24,10 +27,16 @@
       <button *ngIf="isMobile" mat-icon-button type="button" (click)="toggleSidenav()" aria-label="Toggle navigation">
         <mat-icon>menu</mat-icon>
       </button>
-      <div>
+      <div class="flex-1">
         <div class="text-lg font-semibold">Host Dashboard</div>
         <div class="text-xs opacity-80">Operational control center for every stay</div>
       </div>
+      <mat-form-field class="w-full max-w-sm !text-white" subscriptSizing="dynamic">
+        <mat-label>Current property context</mat-label>
+        <mat-select [value]="selectedPropertyId" (selectionChange)="setCurrentProperty($event.value)">
+          <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
     </mat-toolbar>
 
     <div class="p-4 sm:p-6">
@@ -45,7 +54,12 @@
           <div class="p-4"><app-guides-tab></app-guides-tab></div>
         </mat-tab>
         <mat-tab label="Minibar">
-          <div class="p-4"><app-minibar-tab></app-minibar-tab></div>
+          <div class="p-4">
+            <app-minibar-tab *ngIf="isFeatureEnabled('MINIBAR')"></app-minibar-tab>
+            <mat-card *ngIf="!isFeatureEnabled('MINIBAR')" class="rounded-2xl border border-dashed border-slate-300">
+              <mat-card-content class="p-6 text-sm text-slate-600">Minibar is available on the PRO subscription tier.</mat-card-content>
+            </mat-card>
+          </div>
         </mat-tab>
         <mat-tab label="Finances">
           <div class="p-4"><app-finances-tab></app-finances-tab></div>

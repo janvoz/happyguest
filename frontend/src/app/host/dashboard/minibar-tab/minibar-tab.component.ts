@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { ApiService, MinibarItemDto } from '../../../core/api.service';
+import { CurrentPropertyService } from '../../../core/current-property.service';
 import { MinibarItem, Property } from '../../../shared/models';
 import { MinibarItemDialogComponent } from '../minibar-item-dialog/minibar-item-dialog.component';
 
@@ -19,14 +20,17 @@ export class MinibarTabComponent implements OnInit {
 
   constructor(
     private readonly apiService: ApiService,
+    private readonly currentPropertyService: CurrentPropertyService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.apiService.getProperties().subscribe((properties) => {
+    this.currentPropertyService.properties$.subscribe((properties) => {
       this.properties = properties;
-      this.selectedPropertyId = properties[0]?.id ?? '';
+    });
+    this.currentPropertyService.selectedPropertyId$.subscribe((propertyId) => {
+      this.selectedPropertyId = propertyId;
       this.loadItems();
     });
   }

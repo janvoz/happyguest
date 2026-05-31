@@ -2,15 +2,9 @@
   <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
     <div>
       <h2 class="m-0 text-2xl font-semibold text-slate-900">Guest Messages</h2>
-      <p class="m-0 mt-1 text-sm text-slate-500">Monitor issues, collect reviews, and keep response times low.</p>
+      <p class="m-0 mt-1 text-sm text-slate-500">Monitor issues, collect reviews, and keep response times low across all properties.</p>
     </div>
     <div class="flex flex-col gap-3 sm:flex-row">
-      <mat-form-field appearance="outline" class="min-w-[220px]">
-        <mat-label>Select property</mat-label>
-        <mat-select [(value)]="selectedPropertyId" (selectionChange)="loadMessages()">
-          <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
-        </mat-select>
-      </mat-form-field>
       <mat-form-field appearance="outline" class="min-w-[180px]">
         <mat-label>Filter type</mat-label>
         <mat-select [(value)]="filterType" (selectionChange)="applyFilter()">

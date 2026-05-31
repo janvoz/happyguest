@@ -5,12 +5,6 @@
       <p class="m-0 mt-1 text-sm text-slate-500">Track minibar earnings, application fees, and subscription upgrades.</p>
     </div>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <mat-form-field appearance="outline" class="min-w-[260px]">
-        <mat-label>Select property</mat-label>
-        <mat-select [(value)]="selectedPropertyId" (selectionChange)="loadOrders()">
-          <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
-        </mat-select>
-      </mat-form-field>
       <button mat-stroked-button color="primary" type="button" (click)="manageBilling()">Manage Billing</button>
     </div>
   </div>

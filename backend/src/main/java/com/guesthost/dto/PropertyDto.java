@@ -1,5 +1,6 @@
 package com.guesthost.dto;
 
+import com.guesthost.model.Property;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -20,5 +21,7 @@ public class PropertyDto {
     private String bookingReviewUrl;
     private List<String> icalUrls = new ArrayList<>();
     private List<String> checkoutChecklist = new ArrayList<>();
+    private List<Property.FaqItem> faqList = new ArrayList<>();
+    private List<Property.MapMarker> mapMarkers = new ArrayList<>();
     private String customDomain;
 }

@@ -14,12 +14,15 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class OrderProcessingService {
+    private static final DateTimeFormatter VARIABLE_SYMBOL_DATE = DateTimeFormatter.ofPattern("yyMMdd");
 
     private final BookingRepository bookingRepository;
     private final MinibarOrderRepository minibarOrderRepository;
@@ -64,6 +67,8 @@ public class OrderProcessingService {
                 .hostPayoutAmount(hostPayout)
                 .status(MinibarOrder.OrderStatus.PENDING)
                 .stripePaymentIntentId(paymentIntent.id())
+                .variableSymbol(generateVariableSymbol(booking, Instant.now()))
+                .paymentMethod(MinibarOrder.PaymentMethod.STRIPE)
                 .createdAt(Instant.now())
                 .build();
         MinibarOrder saved = minibarOrderRepository.save(order);
@@ -84,6 +89,18 @@ public class OrderProcessingService {
 
     private long toCents(BigDecimal amount) {
         return amount.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).longValueExact();
+    }
+
+    private String generateVariableSymbol(Booking booking, Instant now) {
+        String bookingPart = booking.getId() == null ? "000000" : booking.getId().replaceAll("[^0-9]", "");
+        if (bookingPart.isBlank()) {
+            bookingPart = Integer.toString(Math.abs(booking.getId() == null ? 0 : booking.getId().hashCode()));
+        }
+        if (bookingPart.length() > 4) {
+            bookingPart = bookingPart.substring(bookingPart.length() - 4);
+        }
+        bookingPart = String.format("%4s", bookingPart).replace(' ', '0');
+        return VARIABLE_SYMBOL_DATE.format(now.atZone(ZoneOffset.UTC)) + bookingPart;
     }
 
     public record OrderResult(MinibarOrder order, String clientSecret) {}

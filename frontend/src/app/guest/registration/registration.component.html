@@ -21,14 +21,10 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Citizenship</mat-label>
-            <mat-select formControlName="citizenship">
-              <mat-option *ngFor="let country of countries" [value]="country">{{ country }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field *ngIf="primaryGuestGroup.get('citizenship')?.value === 'Other'" appearance="outline" class="sm:col-span-2">
-            <mat-label>Enter citizenship</mat-label>
-            <input matInput formControlName="citizenshipOther">
+            <input matInput formControlName="citizenship" (input)="filterCountries($any($event.target).value)" [matAutocomplete]="primaryCitizenshipAuto">
+            <mat-autocomplete #primaryCitizenshipAuto="matAutocomplete">
+              <mat-option *ngFor="let country of filteredCountries" [value]="country.code">{{ country.name }} ({{ country.code }})</mat-option>
+            </mat-autocomplete>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -66,13 +62,10 @@
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Citizenship</mat-label>
-                <mat-select formControlName="citizenship">
-                  <mat-option *ngFor="let country of countries" [value]="country">{{ country }}</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field *ngIf="guest.get('citizenship')?.value === 'Other'" appearance="outline" class="sm:col-span-2">
-                <mat-label>Enter citizenship</mat-label>
-                <input matInput formControlName="citizenshipOther">
+                <input matInput formControlName="citizenship" (input)="filterCountries($any($event.target).value)" [matAutocomplete]="guestCitizenshipAuto">
+                <mat-autocomplete #guestCitizenshipAuto="matAutocomplete">
+                  <mat-option *ngFor="let country of filteredCountries" [value]="country.code">{{ country.name }} ({{ country.code }})</mat-option>
+                </mat-autocomplete>
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Document number</mat-label>

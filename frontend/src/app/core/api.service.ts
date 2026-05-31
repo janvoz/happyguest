@@ -51,6 +51,11 @@ export interface RegistrationInviteResponse {
   message: string;
 }
 
+export interface SubscriptionFeaturesResponse {
+  tier: 'FREE' | 'STANDARD' | 'PRO';
+  features: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -212,6 +217,10 @@ export class ApiService {
     return this.http.get<{ url?: string }>(`${this.billingUrl}/portal`).pipe(
       map((response) => response.url ?? '')
     );
+  }
+
+  getSubscriptionFeatures(): Observable<SubscriptionFeaturesResponse> {
+    return this.http.get<SubscriptionFeaturesResponse>(`${this.hostUrl}/subscription/features`);
   }
 
   private buildDateParams(from?: string, to?: string): Record<string, string> {
