@@ -83,9 +83,13 @@
     <mat-card-content class="space-y-3">
       <div class="max-h-64 space-y-2 overflow-y-auto rounded-xl bg-slate-50 p-3">
         <div *ngFor="let msg of chatMessages" class="rounded-lg px-3 py-2 text-sm" [class.bg-indigo-100]="msg.sender === 'HOST'" [class.bg-white]="msg.sender === 'GUEST'">
-          <div class="font-semibold">{{ msg.sender }}</div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-semibold">{{ msg.sender }}</span>
+            <span class="text-[10px] text-slate-400">{{ msg.createdAt | date:'MMM d, HH:mm' }}</span>
+          </div>
           <div>{{ msg.messageText }}</div>
         </div>
+        <div *ngIf="!chatMessages.length" class="py-3 text-center text-sm text-slate-400">No messages for this booking yet.</div>
       </div>
       <form [formGroup]="chatForm" class="flex gap-2">
         <mat-form-field appearance="outline" class="flex-1">

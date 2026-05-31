@@ -10,6 +10,7 @@
           <mat-form-field appearance="outline" class="sm:col-span-2">
             <mat-label>Full name</mat-label>
             <input matInput formControlName="fullName">
+            <mat-error *ngIf="primaryGuestGroup.get('fullName')?.hasError('required')">Full name is required.</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -17,6 +18,7 @@
             <input matInput [matDatepicker]="primaryDobPicker" formControlName="dateOfBirth">
             <mat-datepicker-toggle matSuffix [for]="primaryDobPicker"></mat-datepicker-toggle>
             <mat-datepicker #primaryDobPicker></mat-datepicker>
+            <mat-error *ngIf="primaryGuestGroup.get('dateOfBirth')?.hasError('required')">Date of birth is required.</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -31,10 +33,16 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Citizenship</mat-label>
-            <input matInput formControlName="citizenship" (input)="filterCountries($any($event.target).value)" [matAutocomplete]="primaryCitizenshipAuto">
+            <input matInput formControlName="citizenship"
+                   (input)="filterCountries('primary_citizenship', $any($event.target).value)"
+                   [matAutocomplete]="primaryCitizenshipAuto">
             <mat-autocomplete #primaryCitizenshipAuto="matAutocomplete">
-              <mat-option *ngFor="let country of filteredCountries" [value]="country.code">{{ country.name }} ({{ country.code }})</mat-option>
+              <mat-option *ngFor="let country of getFiltered('primary_citizenship')" [value]="country.code">
+                {{ country.name }} ({{ country.code }})
+              </mat-option>
             </mat-autocomplete>
+            <mat-error *ngIf="primaryGuestGroup.get('citizenship')?.hasError('required')">Citizenship is required.</mat-error>
+            <mat-error *ngIf="primaryGuestGroup.get('citizenship')?.hasError('invalidCountryCode')">Please enter a valid ISO 3166-1 alpha-2 country code (e.g. US, DE, FR).</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -46,19 +54,26 @@
               <mat-option value="VISA">Visa</mat-option>
               <mat-option value="OTHER">Other</mat-option>
             </mat-select>
+            <mat-error *ngIf="primaryGuestGroup.get('documentType')?.hasError('required')">Document type is required.</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Document number</mat-label>
             <input matInput formControlName="documentNumber">
+            <mat-error *ngIf="primaryGuestGroup.get('documentNumber')?.hasError('required')">Document number is required.</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Document issuing country</mat-label>
-            <input matInput formControlName="documentIssuingCountry" [matAutocomplete]="primaryIssuingAuto" (input)="filterCountries($any($event.target).value)">
+            <input matInput formControlName="documentIssuingCountry"
+                   [matAutocomplete]="primaryIssuingAuto"
+                   (input)="filterCountries('primary_issuingCountry', $any($event.target).value)">
             <mat-autocomplete #primaryIssuingAuto="matAutocomplete">
-              <mat-option *ngFor="let country of filteredCountries" [value]="country.code">{{ country.name }} ({{ country.code }})</mat-option>
+              <mat-option *ngFor="let country of getFiltered('primary_issuingCountry')" [value]="country.code">
+                {{ country.name }} ({{ country.code }})
+              </mat-option>
             </mat-autocomplete>
+            <mat-error *ngIf="primaryGuestGroup.get('documentIssuingCountry')?.hasError('invalidCountryCode')">Please enter a valid ISO 3166-1 alpha-2 country code.</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -71,6 +86,7 @@
           <mat-form-field appearance="outline" class="sm:col-span-2">
             <mat-label>Address of permanent residence</mat-label>
             <textarea matInput rows="2" formControlName="address"></textarea>
+            <mat-error *ngIf="primaryGuestGroup.get('address')?.hasError('required')">Permanent home address is required.</mat-error>
           </mat-form-field>
         </div>
         <div class="mt-6 flex justify-end">
@@ -89,12 +105,14 @@
               <mat-form-field appearance="outline" class="sm:col-span-2">
                 <mat-label>Full name</mat-label>
                 <input matInput formControlName="fullName">
+                <mat-error *ngIf="guest.get('fullName')?.hasError('required')">Full name is required.</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Date of birth</mat-label>
                 <input matInput [matDatepicker]="guestDobPicker" formControlName="dateOfBirth">
                 <mat-datepicker-toggle matSuffix [for]="guestDobPicker"></mat-datepicker-toggle>
                 <mat-datepicker #guestDobPicker></mat-datepicker>
+                <mat-error *ngIf="guest.get('dateOfBirth')?.hasError('required')">Date of birth is required.</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Gender</mat-label>
@@ -107,10 +125,16 @@
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Citizenship</mat-label>
-                <input matInput formControlName="citizenship" (input)="filterCountries($any($event.target).value)" [matAutocomplete]="guestCitizenshipAuto">
+                <input matInput formControlName="citizenship"
+                       (input)="filterCountries('guest_' + i + '_citizenship', $any($event.target).value)"
+                       [matAutocomplete]="guestCitizenshipAuto">
                 <mat-autocomplete #guestCitizenshipAuto="matAutocomplete">
-                  <mat-option *ngFor="let country of filteredCountries" [value]="country.code">{{ country.name }} ({{ country.code }})</mat-option>
+                  <mat-option *ngFor="let country of getFiltered('guest_' + i + '_citizenship')" [value]="country.code">
+                    {{ country.name }} ({{ country.code }})
+                  </mat-option>
                 </mat-autocomplete>
+                <mat-error *ngIf="guest.get('citizenship')?.hasError('required')">Citizenship is required.</mat-error>
+                <mat-error *ngIf="guest.get('citizenship')?.hasError('invalidCountryCode')">Please enter a valid ISO 3166-1 alpha-2 country code.</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Document type</mat-label>
@@ -121,17 +145,24 @@
                   <mat-option value="VISA">Visa</mat-option>
                   <mat-option value="OTHER">Other</mat-option>
                 </mat-select>
+                <mat-error *ngIf="guest.get('documentType')?.hasError('required')">Document type is required.</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Document number</mat-label>
                 <input matInput formControlName="documentNumber">
+                <mat-error *ngIf="guest.get('documentNumber')?.hasError('required')">Document number is required.</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Document issuing country</mat-label>
-                <input matInput formControlName="documentIssuingCountry" [matAutocomplete]="guestIssuingAuto" (input)="filterCountries($any($event.target).value)">
+                <input matInput formControlName="documentIssuingCountry"
+                       [matAutocomplete]="guestIssuingAuto"
+                       (input)="filterCountries('guest_' + i + '_issuingCountry', $any($event.target).value)">
                 <mat-autocomplete #guestIssuingAuto="matAutocomplete">
-                  <mat-option *ngFor="let country of filteredCountries" [value]="country.code">{{ country.name }} ({{ country.code }})</mat-option>
+                  <mat-option *ngFor="let country of getFiltered('guest_' + i + '_issuingCountry')" [value]="country.code">
+                    {{ country.name }} ({{ country.code }})
+                  </mat-option>
                 </mat-autocomplete>
+                <mat-error *ngIf="guest.get('documentIssuingCountry')?.hasError('invalidCountryCode')">Please enter a valid ISO 3166-1 alpha-2 country code.</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Document expiry</mat-label>
@@ -142,6 +173,7 @@
               <mat-form-field appearance="outline" class="sm:col-span-2">
                 <mat-label>Address of permanent residence</mat-label>
                 <textarea matInput rows="2" formControlName="address"></textarea>
+                <mat-error *ngIf="guest.get('address')?.hasError('required')">Permanent home address is required.</mat-error>
               </mat-form-field>
             </div>
           </div>

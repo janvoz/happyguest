@@ -85,6 +85,17 @@ export class GuestPortalComponent implements OnInit {
     this.selectedLanguage = language;
   }
 
+  /** Returns a Material icon name appropriate for the contact label. */
+  getContactIcon(label: string): string {
+    const lower = (label ?? '').toLowerCase();
+    if (lower.includes('police') || lower.includes('cop') || lower.includes('security')) return 'local_police';
+    if (lower.includes('fire') || lower.includes('brigade')) return 'local_fire_department';
+    if (lower.includes('medical') || lower.includes('ambulance') || lower.includes('hospital') || lower.includes('doctor')) return 'local_hospital';
+    if (lower.includes('mobile') || lower.includes('host') || lower.includes('owner') || lower.includes('landlord')) return 'phone_iphone';
+    if (lower.includes('maintenance') || lower.includes('repair') || lower.includes('technician')) return 'build';
+    return 'phone';
+  }
+
   get filteredFaqList() {
     const faqs = this.property?.faqList ?? [];
     const term = this.faqSearchTerm.trim().toLowerCase();

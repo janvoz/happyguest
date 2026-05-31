@@ -68,21 +68,116 @@
           </mat-form-field>
         </div>
 
-        <div [formGroup]="listsGroup" class="space-y-4">
+        <div [formGroup]="listsGroup" class="space-y-2">
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>FAQ list JSON</mat-label>
             <textarea matInput rows="6" formControlName="faqJson"></textarea>
           </mat-form-field>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-between">
+        <button mat-stroked-button matStepperPrevious type="button">Back</button>
+        <button mat-flat-button color="primary" matStepperNext type="button">Continue</button>
+      </div>
+    </mat-step>
 
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Map markers JSON</mat-label>
-            <textarea matInput rows="6" formControlName="mapMarkersJson"></textarea>
-          </mat-form-field>
+    <mat-step label="Map markers">
+      <div class="mt-4 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="m-0 text-base font-semibold text-slate-900">Local Tips Map Markers</h3>
+          <button mat-stroked-button color="primary" type="button" (click)="addMarker()">
+            <mat-icon>add_location</mat-icon>
+            Add Marker
+          </button>
+        </div>
+        <p class="text-sm text-slate-500">Drop custom markers that guests will see on the interactive map. Provide GPS coordinates, a description and a category.</p>
 
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Quick contacts JSON</mat-label>
-            <textarea matInput rows="4" formControlName="quickContactsJson"></textarea>
-          </mat-form-field>
+        <div *ngFor="let marker of mapMarkers; let i = index" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-sm font-semibold text-slate-700">Marker {{ i + 1 }}</span>
+            <button mat-icon-button color="warn" type="button" (click)="removeMarker(i)" matTooltip="Remove marker">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <mat-form-field appearance="outline" class="sm:col-span-2">
+              <mat-label>Title</mat-label>
+              <input matInput [(ngModel)]="marker.title" [ngModelOptions]="{standalone: true}" placeholder="e.g. Best pizza in town">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Category</mat-label>
+              <mat-select [(ngModel)]="marker.category" [ngModelOptions]="{standalone: true}">
+                <mat-option value="Restaurants">🍽 Restaurants</mat-option>
+                <mat-option value="Viewpoints">🏔 Viewpoints</mat-option>
+                <mat-option value="Hikes">🥾 Hikes</mat-option>
+                <mat-option value="Kids">🎡 Kids</mat-option>
+                <mat-option value="Other">📍 Other</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input matInput [(ngModel)]="marker.description" [ngModelOptions]="{standalone: true}" placeholder="Short description or tip">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Latitude</mat-label>
+              <input matInput type="number" [(ngModel)]="marker.latitude" [ngModelOptions]="{standalone: true}" placeholder="e.g. 50.0755" step="0.0001">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Longitude</mat-label>
+              <input matInput type="number" [(ngModel)]="marker.longitude" [ngModelOptions]="{standalone: true}" placeholder="e.g. 14.4378" step="0.0001">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div *ngIf="!mapMarkers.length" class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400">
+          No markers yet. Click "Add Marker" to drop your first local tip on the map.
+        </div>
+      </div>
+      <div class="mt-6 flex justify-between">
+        <button mat-stroked-button matStepperPrevious type="button">Back</button>
+        <button mat-flat-button color="primary" matStepperNext type="button">Continue</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Emergency contacts">
+      <div class="mt-4 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="m-0 text-base font-semibold text-slate-900">Rapid Emergency Contacts</h3>
+          <button mat-stroked-button color="primary" type="button" (click)="addContact()">
+            <mat-icon>add_call</mat-icon>
+            Add Contact
+          </button>
+        </div>
+        <p class="text-sm text-slate-500">These contacts appear on a prominent Emergency Card at the top of the guest portal with click-to-call action.</p>
+
+        <div *ngFor="let contact of quickContacts; let i = index" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-sm font-semibold text-slate-700">Contact {{ i + 1 }}</span>
+            <button mat-icon-button color="warn" type="button" (click)="removeContact(i)" matTooltip="Remove contact">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Label</mat-label>
+              <mat-select [(ngModel)]="contact.label" [ngModelOptions]="{standalone: true}">
+                <mat-option value="Police">🚔 Police</mat-option>
+                <mat-option value="Fire Brigade">🚒 Fire Brigade</mat-option>
+                <mat-option value="Medical / Ambulance">🚑 Medical / Ambulance</mat-option>
+                <mat-option value="Host Mobile">📱 Host Mobile</mat-option>
+                <mat-option value="Maintenance">🔧 Maintenance</mat-option>
+                <mat-option value="Other">📞 Other</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Phone number</mat-label>
+              <input matInput type="tel" [(ngModel)]="contact.phone" [ngModelOptions]="{standalone: true}" placeholder="e.g. +1 911">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div *ngIf="!quickContacts.length" class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400">
+          No emergency contacts configured. Click "Add Contact" to add the first one.
         </div>
       </div>
       <div class="mt-6 flex justify-between">

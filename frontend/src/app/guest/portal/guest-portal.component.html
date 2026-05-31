@@ -72,17 +72,28 @@
         </mat-card-content>
       </mat-card>
 
-      <app-access-card [booking]="booking" [property]="property"></app-access-card>
-      <mat-card *ngIf="property.quickContacts?.length" class="rounded-3xl border border-red-300/40 bg-red-50 text-slate-900">
-        <mat-card-header>
-          <mat-card-title>Emergency contacts</mat-card-title>
+      <mat-card *ngIf="property.quickContacts?.length" class="rounded-3xl border-2 border-red-400 bg-gradient-to-br from-red-50 to-orange-50 text-slate-900 shadow-lg">
+        <mat-card-header class="pb-0">
+          <mat-card-title class="flex items-center gap-2 text-red-700">
+            <mat-icon class="!text-red-600">emergency</mat-icon>
+            Emergency &amp; Rapid Contacts
+          </mat-card-title>
+          <mat-card-subtitle class="text-red-500">Tap to call immediately in case of emergency.</mat-card-subtitle>
         </mat-card-header>
-        <mat-card-content class="grid gap-2 sm:grid-cols-2">
-          <a *ngFor="let contact of property.quickContacts" class="rounded-xl border border-red-100 bg-white px-4 py-3 text-sm font-medium text-red-700 no-underline" [href]="'tel:' + contact.phone">
-            {{ contact.label }} · {{ contact.phone }}
+        <mat-card-content class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <a *ngFor="let contact of property.quickContacts"
+             [href]="'tel:' + contact.phone"
+             class="flex items-center gap-3 rounded-2xl border border-red-200 bg-white px-4 py-3 font-medium text-red-700 no-underline shadow-sm transition hover:bg-red-600 hover:text-white active:scale-95">
+            <mat-icon class="shrink-0">{{ getContactIcon(contact.label) }}</mat-icon>
+            <div class="min-w-0">
+              <div class="text-sm font-semibold truncate">{{ contact.label }}</div>
+              <div class="text-xs opacity-80">{{ contact.phone }}</div>
+            </div>
           </a>
         </mat-card-content>
       </mat-card>
+
+      <app-access-card [booking]="booking" [property]="property"></app-access-card>
       <app-guide-grid [propertyId]="propertyId"></app-guide-grid>
       <mat-card *ngIf="property.faqList?.length" class="rounded-3xl shadow-sm">
         <mat-card-header>

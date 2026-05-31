@@ -20,6 +20,7 @@ export class GuideDialogComponent {
   readonly form: FormGroup;
   uploadingMedia = false;
   uploadedUrls: string[] = [];
+  isDragOver = false;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -48,31 +49,48 @@ export class GuideDialogComponent {
     });
   }
 
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(): void {
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+    const file = event.dataTransfer?.files?.[0];
+    if (file) {
+      this.uploadFile(file);
+    }
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    if (!this.data.guide?.id) {
-      this.snack.open('Save the guide first before uploading media.', 'OK', { duration: 4000 });
-      return;
-    }
-    this.uploadingMedia = true;
-    this.api.uploadGuideMedia(this.data.guide.id, file).subscribe({
-      next: res => {
-        this.uploadedUrls.push(res.url);
-        this.uploadingMedia = false;
-        this.snack.open('Media uploaded', 'OK', { duration: 2000 });
-      },
-      error: () => {
-        this.uploadingMedia = false;
-        this.snack.open('Upload failed', 'OK', { duration: 3000 });
-      },
-    });
+    this.uploadFile(file);
     input.value = '';
   }
 
   removeMedia(url: string): void {
     this.uploadedUrls = this.uploadedUrls.filter(u => u !== url);
+  }
+
+  isImage(url: string): boolean {
+    return /\.(jpe?g|png|gif|webp)(\?.*)?$/i.test(url);
+  }
+
+  isPdf(url: string): boolean {
+    return /\.pdf(\?.*)?$/i.test(url);
+  }
+
+  isVideo(url: string): boolean {
+    return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
   }
 
   save(): void {
@@ -88,6 +106,30 @@ export class GuideDialogComponent {
     });
   }
 
+  private uploadFile(file: File): void {
+    if (!this.data.guide?.id) {
+      this.snack.open('Save the guide first before uploading media.', 'OK', { duration: 4000 });
+      return;
+    }
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4'];
+    if (!allowedTypes.includes(file.type)) {
+      this.snack.open('Only JPEG, PNG, PDF and MP4 files are accepted.', 'OK', { duration: 4000 });
+      return;
+    }
+    this.uploadingMedia = true;
+    this.api.uploadGuideMedia(this.data.guide.id, file).subscribe({
+      next: res => {
+        this.uploadedUrls.push(res.url);
+        this.uploadingMedia = false;
+        this.snack.open('Media uploaded', 'OK', { duration: 2000 });
+      },
+      error: () => {
+        this.uploadingMedia = false;
+        this.snack.open('Upload failed', 'OK', { duration: 3000 });
+      },
+    });
+  }
+
   private slugify(value: string): string {
     return value
       .toLowerCase()
@@ -96,4 +138,3 @@ export class GuideDialogComponent {
       .replace(/^-+|-+$/g, '');
   }
 }
-

@@ -13,10 +13,10 @@ const iconDefault = L.icon({
 });
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Restaurant: '#ef4444',
-  Trip: '#3b82f6',
-  Hike: '#22c55e',
-  Groceries: '#f59e0b',
+  Restaurants: '#ef4444',
+  Viewpoints: '#3b82f6',
+  Hikes: '#22c55e',
+  Kids: '#f59e0b',
   Other: '#8b5cf6',
 };
 
