@@ -1,12 +1,14 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { AuthService } from '../../core/auth.service';
 import { ApiService } from '../../core/api.service';
 import { CurrentPropertyService } from '../../core/current-property.service';
 import { SubscriptionFeatureService } from '../../core/subscription-feature.service';
+import { HostI18nService, HostLang } from '../../core/host-i18n.service';
 import { Property } from '../../shared/models';
 
 @Component({
@@ -21,10 +23,11 @@ export class DashboardComponent implements OnInit {
     { label: 'Bookings', icon: 'event', tabIndex: 1 },
     { label: 'Logbook', icon: 'description', tabIndex: 2 },
     { label: 'Guides', icon: 'menu_book', tabIndex: 3 },
-    { label: 'Minibar', icon: 'local_bar', tabIndex: 4, requiredFeature: 'MINIBAR' },
-    { label: 'Templates', icon: 'mark_email_read', tabIndex: 5 },
-    { label: 'Finances & Billing', icon: 'payments', tabIndex: 6 },
-    { label: 'Messages', icon: 'chat', tabIndex: 7, isGlobal: true }
+    { label: 'FAQ', icon: 'quiz', tabIndex: 4 },
+    { label: 'Minibar', icon: 'local_bar', tabIndex: 5, requiredFeature: 'MINIBAR' },
+    { label: 'Templates', icon: 'mark_email_read', tabIndex: 6 },
+    { label: 'Finances & Billing', icon: 'payments', tabIndex: 7 },
+    { label: 'Messages', icon: 'chat', tabIndex: 8, isGlobal: true }
   ];
   availableFeatures = new Set<string>();
   properties: Property[] = [];
@@ -33,13 +36,16 @@ export class DashboardComponent implements OnInit {
   selectedTabIndex = 0;
   unreadMessages = 0;
   currentUserEmail = '';
+  hostLangs: HostLang[] = ['en', 'cs'];
 
   constructor(
     private readonly breakpointObserver: BreakpointObserver,
     private readonly apiService: ApiService,
     private readonly authService: AuthService,
     private readonly currentPropertyService: CurrentPropertyService,
-    private readonly subscriptionFeatureService: SubscriptionFeatureService
+    private readonly subscriptionFeatureService: SubscriptionFeatureService,
+    private readonly router: Router,
+    readonly i18n: HostI18nService,
   ) {}
 
   ngOnInit(): void {
@@ -61,7 +67,7 @@ export class DashboardComponent implements OnInit {
   }
 
   openTab(index: number): void {
-    this.selectedTabIndex = Math.min(index, 7);
+    this.selectedTabIndex = Math.min(index, 8);
     if (this.isMobile) {
       void this.sidenav?.close();
     }
@@ -69,6 +75,16 @@ export class DashboardComponent implements OnInit {
 
   toggleSidenav(): void {
     void this.sidenav?.toggle();
+  }
+
+  setHostLang(lang: HostLang): void {
+    this.i18n.setLang(lang);
+  }
+
+  printWelcomeSign(): void {
+    if (this.selectedPropertyId) {
+      void this.router.navigate(['/host/welcome-sign', this.selectedPropertyId]);
+    }
   }
 
   refreshUnreadCount(): void {

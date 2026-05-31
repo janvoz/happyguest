@@ -57,6 +57,10 @@ public class Property {
     public static class FaqItem {
         private String question;
         private String answer;
+        /** Czech-language question (optional). */
+        private String questionCs;
+        /** Czech-language answer (optional). */
+        private String answerCs;
     }
 
     @Data

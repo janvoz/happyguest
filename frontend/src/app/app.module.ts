@@ -12,6 +12,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
@@ -50,6 +51,8 @@ import { ReviewComponent } from './guest/review/review.component';
 import { BookingDialogComponent } from './host/dashboard/booking-dialog/booking-dialog.component';
 import { BookingsTabComponent } from './host/dashboard/bookings-tab/bookings-tab.component';
 import { DashboardComponent } from './host/dashboard/dashboard.component';
+import { FaqTabComponent } from './host/dashboard/faq-tab/faq-tab.component';
+import { FaqItemDialogComponent } from './host/dashboard/faq-tab/faq-item-dialog.component';
 import { FinancesTabComponent } from './host/dashboard/finances-tab/finances-tab.component';
 import { GuideDialogComponent } from './host/dashboard/guide-dialog/guide-dialog.component';
 import { GuidesTabComponent } from './host/dashboard/guides-tab/guides-tab.component';
@@ -61,6 +64,8 @@ import { PropertiesTabComponent } from './host/dashboard/properties-tab/properti
 import { PropertyDialogComponent } from './host/dashboard/property-dialog/property-dialog.component';
 import { TemplateDialogComponent } from './host/dashboard/template-dialog/template-dialog.component';
 import { TemplatesTabComponent } from './host/dashboard/templates-tab/templates-tab.component';
+import { WelcomeSignComponent } from './host/welcome-sign/welcome-sign.component';
+import { MapComponent } from './shared/map/map.component';
 import { TruncatePipe } from './shared/pipes/truncate.pipe';
 
 @NgModule({
@@ -69,6 +74,8 @@ import { TruncatePipe } from './shared/pipes/truncate.pipe';
     LoginComponent,
     RegisterComponent,
     DashboardComponent,
+    FaqTabComponent,
+    FaqItemDialogComponent,
     PropertiesTabComponent,
     PropertyDialogComponent,
     BookingsTabComponent,
@@ -90,6 +97,8 @@ import { TruncatePipe } from './shared/pipes/truncate.pipe';
     ReviewDialogComponent,
     ReviewComponent,
     MessageBoxComponent,
+    MapComponent,
+    WelcomeSignComponent,
     TruncatePipe,
     TemplatesTabComponent,
     TemplateDialogComponent
@@ -107,6 +116,7 @@ import { TruncatePipe } from './shared/pipes/truncate.pipe';
     MatIconModule,
     MatButtonModule,
     MatCardModule,
+    MatDividerModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,

@@ -18,6 +18,7 @@ public class GuideItemDto {
 
     private String slug;
     private String contentMarkdown;
+    private String contentMarkdownCs;
     private String videoUrl;
     private List<String> photoUrls = new ArrayList<>();
     private int displayOrder;

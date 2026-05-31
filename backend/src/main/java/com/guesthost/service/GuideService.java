@@ -41,6 +41,7 @@ public class GuideService {
                 .title(dto.getTitle())
                 .slug(slug)
                 .contentMarkdown(dto.getContentMarkdown())
+                .contentMarkdownCs(dto.getContentMarkdownCs())
                 .videoUrl(dto.getVideoUrl())
                 .qrCodeUrl(buildQrCodeUrl(property.getId(), slug))
                 .photoUrls(dto.getPhotoUrls())
@@ -57,6 +58,7 @@ public class GuideService {
         existing.setTitle(dto.getTitle());
         existing.setSlug(slug);
         existing.setContentMarkdown(dto.getContentMarkdown());
+        existing.setContentMarkdownCs(dto.getContentMarkdownCs());
         existing.setVideoUrl(dto.getVideoUrl());
         existing.setPhotoUrls(dto.getPhotoUrls());
         existing.setDisplayOrder(dto.getDisplayOrder());

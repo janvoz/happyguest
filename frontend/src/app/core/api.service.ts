@@ -286,6 +286,36 @@ export class ApiService {
     return this.http.delete<void>(`${this.hostUrl}/templates/${id}`);
   }
 
+  getFaq(propertyId: string): Observable<import('../shared/models').PropertyFaqItem[]> {
+    return this.http.get<import('../shared/models').PropertyFaqItem[]>(`${this.hostUrl}/properties/${propertyId}/faq`);
+  }
+
+  addFaqItem(propertyId: string, item: import('../shared/models').PropertyFaqItem): Observable<import('../shared/models').PropertyFaqItem[]> {
+    return this.http.post<import('../shared/models').PropertyFaqItem[]>(`${this.hostUrl}/properties/${propertyId}/faq`, item);
+  }
+
+  updateFaqItem(propertyId: string, index: number, item: import('../shared/models').PropertyFaqItem): Observable<import('../shared/models').PropertyFaqItem[]> {
+    return this.http.put<import('../shared/models').PropertyFaqItem[]>(`${this.hostUrl}/properties/${propertyId}/faq/${index}`, item);
+  }
+
+  deleteFaqItem(propertyId: string, index: number): Observable<void> {
+    return this.http.delete<void>(`${this.hostUrl}/properties/${propertyId}/faq/${index}`);
+  }
+
+  replaceFaqList(propertyId: string, list: import('../shared/models').PropertyFaqItem[]): Observable<import('../shared/models').PropertyFaqItem[]> {
+    return this.http.put<import('../shared/models').PropertyFaqItem[]>(`${this.hostUrl}/properties/${propertyId}/faq`, list);
+  }
+
+  uploadGuideMedia(guideId: string, file: File): Observable<{ url: string }> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<{ url: string }>(`${this.hostUrl}/guides/${guideId}/media`, form);
+  }
+
+  getPortalQr(propertyId: string): Observable<import('../shared/models').PortalQrResponse> {
+    return this.http.get<import('../shared/models').PortalQrResponse>(`${this.hostUrl}/properties/${propertyId}/portal-qr`);
+  }
+
   private buildDateParams(from?: string, to?: string): Record<string, string> {
     const params: Record<string, string> = {};
     if (from) {

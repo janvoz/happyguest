@@ -31,4 +31,7 @@ public class GuideItem {
     private List<String> photoUrls = new ArrayList<>();
 
     private int displayOrder;
+
+    /** Czech-language version of the guide content (optional). */
+    private String contentMarkdownCs;
 }

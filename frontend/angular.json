@@ -19,7 +19,7 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": ["src/assets"],
-            "styles": ["src/styles.scss"],
+            "styles": ["src/styles.scss", "node_modules/leaflet/dist/leaflet.css"],
             "scripts": []
           },
           "configurations": {
@@ -64,7 +64,7 @@
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": ["src/assets"],
-            "styles": ["src/styles.scss"],
+            "styles": ["src/styles.scss", "node_modules/leaflet/dist/leaflet.css"],
             "scripts": [],
             "karmaConfig": "karma.conf.js"
           }
