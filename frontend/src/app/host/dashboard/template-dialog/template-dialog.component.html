@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>{{ data.template ? 'Edit Template' : 'Add Template' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="mt-4 grid gap-4">
+    <mat-form-field appearance="outline">
+      <mat-label>Trigger</mat-label>
+      <mat-select formControlName="triggerType">
+        <mat-option *ngFor="let opt of triggerOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+      </mat-select>
+      <mat-error>Trigger is required.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Subject</mat-label>
+      <input matInput formControlName="subject">
+      <mat-error>Subject is required.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>HTML Body</mat-label>
+      <textarea matInput rows="12" formControlName="htmlBody" class="font-mono text-sm"></textarea>
+      <mat-error>HTML body is required.</mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">Save Template</button>
+</mat-dialog-actions>

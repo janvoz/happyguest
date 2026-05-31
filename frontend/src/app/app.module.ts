@@ -58,6 +58,8 @@ import { MinibarItemDialogComponent } from './host/dashboard/minibar-item-dialog
 import { MinibarTabComponent } from './host/dashboard/minibar-tab/minibar-tab.component';
 import { PropertiesTabComponent } from './host/dashboard/properties-tab/properties-tab.component';
 import { PropertyDialogComponent } from './host/dashboard/property-dialog/property-dialog.component';
+import { TemplateDialogComponent } from './host/dashboard/template-dialog/template-dialog.component';
+import { TemplatesTabComponent } from './host/dashboard/templates-tab/templates-tab.component';
 import { TruncatePipe } from './shared/pipes/truncate.pipe';
 
 @NgModule({
@@ -87,7 +89,9 @@ import { TruncatePipe } from './shared/pipes/truncate.pipe';
     ReviewDialogComponent,
     ReviewComponent,
     MessageBoxComponent,
-    TruncatePipe
+    TruncatePipe,
+    TemplatesTabComponent,
+    TemplateDialogComponent
   ],
   imports: [
     BrowserModule,
