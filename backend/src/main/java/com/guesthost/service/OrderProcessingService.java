@@ -5,8 +5,11 @@ import com.guesthost.exception.ResourceNotFoundException;
 import com.guesthost.model.Booking;
 import com.guesthost.model.MinibarOrder;
 import com.guesthost.model.OrderLine;
+import com.guesthost.model.User;
 import com.guesthost.repository.BookingRepository;
 import com.guesthost.repository.MinibarOrderRepository;
+import com.guesthost.repository.PropertyRepository;
+import com.guesthost.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -28,6 +32,8 @@ public class OrderProcessingService {
     private final MinibarOrderRepository minibarOrderRepository;
     private final MinibarService minibarService;
     private final StripeClient stripeClient;
+    private final UserRepository userRepository;
+    private final PropertyRepository propertyRepository;
 
     @Value("${app.stripe.application-fee-percent:2}")
     private BigDecimal applicationFeePercent;
@@ -48,15 +54,18 @@ public class OrderProcessingService {
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         BigDecimal hostPayout = totalAmount.subtract(fee).setScale(2, RoundingMode.HALF_UP);
 
-        StripeClient.PaymentIntentResult paymentIntent = stripeClient.createPaymentIntent(
-                toCents(totalAmount),
-                toCents(fee),
-                "usd",
-                Map.of(
-                        "bookingId", booking.getId(),
-                        "propertyId", booking.getPropertyId()
+        MinibarOrder.PaymentMethod paymentMethod = resolvePaymentMethod(request.getPaymentMethod());
+        StripeClient.PaymentIntentResult paymentIntent = paymentMethod == MinibarOrder.PaymentMethod.STRIPE
+                ? stripeClient.createPaymentIntent(
+                        toCents(totalAmount),
+                        toCents(fee),
+                        "usd",
+                        Map.of(
+                                "bookingId", booking.getId(),
+                                "propertyId", booking.getPropertyId()
+                        )
                 )
-        );
+                : new StripeClient.PaymentIntentResult("", "");
 
         MinibarOrder order = MinibarOrder.builder()
                 .bookingId(booking.getId())
@@ -66,13 +75,14 @@ public class OrderProcessingService {
                 .applicationFee(fee)
                 .hostPayoutAmount(hostPayout)
                 .status(MinibarOrder.OrderStatus.PENDING)
-                .stripePaymentIntentId(paymentIntent.id())
+                .stripePaymentIntentId(paymentMethod == MinibarOrder.PaymentMethod.STRIPE ? paymentIntent.id() : null)
                 .variableSymbol(generateVariableSymbol(booking, Instant.now()))
-                .paymentMethod(MinibarOrder.PaymentMethod.STRIPE)
+                .paymentMethod(paymentMethod)
                 .createdAt(Instant.now())
                 .build();
         MinibarOrder saved = minibarOrderRepository.save(order);
-        return new OrderResult(saved, paymentIntent.clientSecret());
+        String spaydPayload = paymentMethod == MinibarOrder.PaymentMethod.QR_BANK ? buildSpaydPayload(saved) : "";
+        return new OrderResult(saved, paymentIntent.clientSecret(), spaydPayload);
     }
 
     public MinibarOrder confirmOrder(String stripePaymentIntentId) {
@@ -103,5 +113,32 @@ public class OrderProcessingService {
         return VARIABLE_SYMBOL_DATE.format(now.atZone(ZoneOffset.UTC)) + bookingPart;
     }
 
-    public record OrderResult(MinibarOrder order, String clientSecret) {}
+    public record OrderResult(MinibarOrder order, String clientSecret, String spaydPayload) {}
+
+    private MinibarOrder.PaymentMethod resolvePaymentMethod(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return MinibarOrder.PaymentMethod.STRIPE;
+        }
+        return MinibarOrder.PaymentMethod.valueOf(raw.trim().toUpperCase(Locale.ROOT));
+    }
+
+    private String buildSpaydPayload(MinibarOrder order) {
+        Booking booking = bookingRepository.findById(order.getBookingId())
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + order.getBookingId()));
+        String hostId = propertyRepository.findById(booking.getPropertyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found: " + booking.getPropertyId()))
+                .getHostId();
+        User host = userRepository.findById(hostId)
+                .orElseThrow(() -> new ResourceNotFoundException("Host not found"));
+        if (host.getIban() == null || host.getIban().isBlank()) {
+            throw new IllegalStateException("Host IBAN is required for QR bank payments");
+        }
+        String amount = order.getTotalAmount() == null ? "0.00" : order.getTotalAmount().setScale(2, RoundingMode.HALF_UP).toPlainString();
+        String bic = host.getSwift() == null ? "" : host.getSwift().trim().toUpperCase(Locale.ROOT);
+        return "SPD*1.0*ACC:" + host.getIban().replace(" ", "")
+                + (bic.isBlank() ? "" : "+BIC:" + bic)
+                + "*AM:" + amount
+                + "*CC:CZK*X-VS:" + order.getVariableSymbol()
+                + "*MSG:Minibar " + order.getBookingId();
+    }
 }

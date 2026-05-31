@@ -12,12 +12,19 @@ import { Booking, Property } from '../../shared/models';
 })
 export class GuestPortalComponent implements OnInit {
   readonly bookingReferenceForm: FormGroup;
+  readonly labels: Record<string, { title: string; subtitle: string; bookingRef: string; lastName: string; continue: string }> = {
+    en: { title: 'Enter your booking reference', subtitle: 'Use your booking reference and last name to unlock access.', bookingRef: 'Booking reference', lastName: 'Last name', continue: 'Continue' },
+    cs: { title: 'Zadejte referenci rezervace', subtitle: 'Pro odemčení přístupu použijte číslo rezervace a příjmení.', bookingRef: 'Reference rezervace', lastName: 'Příjmení', continue: 'Pokračovat' },
+    de: { title: 'Buchungsreferenz eingeben', subtitle: 'Nutzen Sie Referenz und Nachnamen für den Zugang.', bookingRef: 'Buchungsreferenz', lastName: 'Nachname', continue: 'Weiter' },
+    pl: { title: 'Wpisz numer rezerwacji', subtitle: 'Użyj numeru rezerwacji i nazwiska, aby uzyskać dostęp.', bookingRef: 'Numer rezerwacji', lastName: 'Nazwisko', continue: 'Dalej' }
+  };
   propertyId = '';
   bookingId = '';
   property: Property | null = null;
   booking: Booking | null = null;
   showRegistrationForm = false;
   isLoading = true;
+  selectedLanguage: 'en' | 'cs' | 'de' | 'pl' = 'en';
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -26,11 +33,15 @@ export class GuestPortalComponent implements OnInit {
     private readonly snackBar: MatSnackBar
   ) {
     this.bookingReferenceForm = this.fb.group({
-      bookingReference: ['', Validators.required]
+      bookingReference: ['', Validators.required],
+      lastName: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
+    const language = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    this.selectedLanguage = ['cs', 'de', 'pl'].includes(language) ? language as 'cs' | 'de' | 'pl' : 'en';
+
     this.route.paramMap.subscribe((params) => {
       this.propertyId = params.get('propertyId') ?? '';
       this.loadProperty();
@@ -53,7 +64,8 @@ export class GuestPortalComponent implements OnInit {
     }
 
     const reference = String(this.bookingReferenceForm.getRawValue().bookingReference ?? '');
-    this.loadBooking(reference, true);
+    const lastName = String(this.bookingReferenceForm.getRawValue().lastName ?? '');
+    this.loadBooking(reference, true, lastName);
   }
 
   revealRegistration(): void {
@@ -83,10 +95,10 @@ export class GuestPortalComponent implements OnInit {
     });
   }
 
-  private loadBooking(reference: string, byReference = false): void {
+  private loadBooking(reference: string, byReference = false, lastName = ''): void {
     this.isLoading = true;
     const request = byReference
-      ? this.apiService.getBookingByReference(this.propertyId, reference)
+      ? this.apiService.getBookingByGate(this.propertyId, reference, lastName)
       : this.apiService.getPublicBooking(reference);
 
     request.subscribe({

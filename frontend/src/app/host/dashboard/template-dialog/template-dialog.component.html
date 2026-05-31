@@ -20,6 +20,13 @@
       <textarea matInput rows="12" formControlName="htmlBody" class="font-mono text-sm"></textarea>
       <mat-error>HTML body is required.</mat-error>
     </mat-form-field>
+
+    <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Placeholders</div>
+      <div class="flex flex-wrap gap-2">
+        <button *ngFor="let token of placeholders" mat-stroked-button type="button" (click)="appendPlaceholder(token)">{{ token }}</button>
+      </div>
+    </div>
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">

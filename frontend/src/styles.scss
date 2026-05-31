@@ -18,13 +18,24 @@ body { background: #f8fafc; color: #0f172a; }
   width: 100%;
 }
 
+.mat-mdc-form-field .mdc-text-field--outlined {
+  --mdc-outlined-text-field-container-shape: 0.75rem;
+}
+
 .mat-mdc-text-field-wrapper {
   background-color: transparent !important;
+  padding-left: 0.1rem;
+  padding-right: 0.1rem;
 }
 
 .mat-mdc-form-field-infix {
   padding-top: 0.7rem !important;
   padding-bottom: 0.7rem !important;
+}
+
+.mat-mdc-form-field .mdc-floating-label {
+  background: transparent;
+  padding: 0 0.2rem;
 }
 
 .mdc-notched-outline__leading,

@@ -67,6 +67,23 @@
             <input matInput placeholder="Type item and press Enter" [matChipInputFor]="checklistChipGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addChecklist($event)">
           </mat-form-field>
         </div>
+
+        <div [formGroup]="listsGroup" class="space-y-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>FAQ list JSON</mat-label>
+            <textarea matInput rows="6" formControlName="faqJson"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Map markers JSON</mat-label>
+            <textarea matInput rows="6" formControlName="mapMarkersJson"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Quick contacts JSON</mat-label>
+            <textarea matInput rows="4" formControlName="quickContactsJson"></textarea>
+          </mat-form-field>
+        </div>
       </div>
       <div class="mt-6 flex justify-between">
         <button mat-stroked-button matStepperPrevious type="button">Back</button>

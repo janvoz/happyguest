@@ -20,6 +20,10 @@ export class PropertyDialogComponent {
     return this.form.controls['basics'] as FormGroup;
   }
 
+  get listsGroup(): FormGroup {
+    return this.form.controls['lists'] as FormGroup;
+  }
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialogRef: MatDialogRef<PropertyDialogComponent>,
@@ -36,7 +40,10 @@ export class PropertyDialogComponent {
       }),
       lists: this.fb.group({
         icalInput: [''],
-        checklistInput: ['']
+        checklistInput: [''],
+        faqJson: [JSON.stringify(this.data?.faqList ?? [], null, 2)],
+        mapMarkersJson: [JSON.stringify(this.data?.mapMarkers ?? [], null, 2)],
+        quickContactsJson: [JSON.stringify(this.data?.quickContacts ?? [], null, 2)]
       })
     });
     this.icalUrls = [...(this.data?.icalUrls ?? [])];
@@ -74,6 +81,7 @@ export class PropertyDialogComponent {
     }
 
     const basics = this.basicsGroup.getRawValue();
+    const lists = this.listsGroup.getRawValue();
     this.dialogRef.close({
       name: basics.name,
       address: basics.address,
@@ -82,7 +90,19 @@ export class PropertyDialogComponent {
       airbnbReviewUrl: basics.airbnbReviewUrl,
       bookingReviewUrl: basics.bookingReviewUrl,
       icalUrls: this.icalUrls,
-      checkoutChecklist: this.checkoutChecklist
+      checkoutChecklist: this.checkoutChecklist,
+      faqList: this.parseJsonArray(lists.faqJson),
+      mapMarkers: this.parseJsonArray(lists.mapMarkersJson),
+      quickContacts: this.parseJsonArray(lists.quickContactsJson)
     });
+  }
+
+  private parseJsonArray(raw: string): unknown[] {
+    try {
+      const parsed = JSON.parse(raw ?? '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 }

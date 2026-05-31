@@ -31,7 +31,7 @@
         <div class="text-lg font-semibold">Host Dashboard</div>
         <div class="text-xs opacity-80">Operational control center for every stay</div>
       </div>
-      <mat-form-field class="w-full max-w-sm !text-white" subscriptSizing="dynamic">
+      <mat-form-field appearance="outline" class="w-full max-w-sm !text-white" subscriptSizing="dynamic">
         <mat-label>Current property context</mat-label>
         <mat-select [value]="selectedPropertyId" (selectionChange)="setCurrentProperty($event.value)">
           <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>

@@ -74,4 +74,26 @@
       <div class="text-sm text-slate-500">Booking ID: {{ selectedMessage.bookingId }}</div>
     </mat-card-content>
   </mat-card>
+
+  <mat-card *ngIf="selectedMessage" class="rounded-3xl shadow-sm">
+    <mat-card-header>
+      <mat-card-title>Live chat thread</mat-card-title>
+      <mat-card-subtitle>Booking {{ selectedMessage.bookingId }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="space-y-3">
+      <div class="max-h-64 space-y-2 overflow-y-auto rounded-xl bg-slate-50 p-3">
+        <div *ngFor="let msg of chatMessages" class="rounded-lg px-3 py-2 text-sm" [class.bg-indigo-100]="msg.sender === 'HOST'" [class.bg-white]="msg.sender === 'GUEST'">
+          <div class="font-semibold">{{ msg.sender }}</div>
+          <div>{{ msg.messageText }}</div>
+        </div>
+      </div>
+      <form [formGroup]="chatForm" class="flex gap-2">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Reply</mat-label>
+          <input matInput formControlName="messageText">
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" (click)="sendHostMessage()">Send</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </div>

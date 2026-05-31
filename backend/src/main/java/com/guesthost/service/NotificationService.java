@@ -1,6 +1,9 @@
 package com.guesthost.service;
 
 import com.guesthost.model.Booking;
+import com.guesthost.model.EmailTemplate;
+import com.guesthost.model.Property;
+import com.guesthost.repository.PropertyRepository;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +23,9 @@ import java.time.LocalDateTime;
 public class NotificationService {
 
     private final com.guesthost.repository.BookingRepository bookingRepository;
+    private final PropertyRepository propertyRepository;
     private final JavaMailSender javaMailSender;
+    private final EmailTemplateRenderService emailTemplateRenderService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -70,10 +75,24 @@ public class NotificationService {
         }
 
         String link = frontendUrl + "/guest/portal/" + booking.getPropertyId() + "?bookingId=" + booking.getId();
-        String body = "<html><body><h2>Action Required: Complete Registration to Get Your Door Code</h2>"
+        Property property = propertyRepository.findById(booking.getPropertyId()).orElse(null);
+        String fallbackBody = "<html><body><h2>Action Required: Complete Registration to Get Your Door Code</h2>"
                 + "<p>Please complete your registration before arrival to receive your door code.</p>"
                 + "<p><a href=\"" + link + "\">Complete Registration</a></p></body></html>";
-        return sendEmail(booking.getGuestEmail(), "Action Required: Complete Registration to Get Your Door Code", body);
+        if (property == null) {
+            return sendEmail(booking.getGuestEmail(), "Action Required: Complete Registration to Get Your Door Code", fallbackBody);
+        }
+
+        EmailTemplateRenderService.RenderedTemplate rendered = emailTemplateRenderService.resolveTemplate(
+                property.getHostId(),
+                property,
+                booking,
+                EmailTemplate.TriggerType.PRE_ARRIVAL,
+                "Action Required: Complete Registration to Get Your Door Code",
+                fallbackBody,
+                link
+        );
+        return sendEmail(booking.getGuestEmail(), rendered.subject(), rendered.htmlBody());
     }
 
     private boolean sendEmail(String to, String subject, String htmlBody) {

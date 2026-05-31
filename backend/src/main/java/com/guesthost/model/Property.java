@@ -45,6 +45,9 @@ public class Property {
     @Builder.Default
     private List<MapMarker> mapMarkers = new ArrayList<>();
 
+    @Builder.Default
+    private List<QuickContact> quickContacts = new ArrayList<>();
+
     private String customDomain;
 
     @Data
@@ -66,5 +69,14 @@ public class Property {
         private String description;
         private Double latitude;
         private Double longitude;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class QuickContact {
+        private String label;
+        private String phone;
     }
 }

@@ -5,6 +5,7 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   Booking,
+  ChatMessage,
   EmailTemplate,
   GuestMessage,
   GuestRegistration,
@@ -39,6 +40,7 @@ export interface OrderDto {
   bookingId: string;
   propertyId: string;
   items: Array<{ minibarItemId: string; quantity: number }>;
+  paymentMethod?: 'STRIPE' | 'QR_BANK';
 }
 export interface EmailTemplateDto {
   propertyId: string;
@@ -48,6 +50,7 @@ export interface EmailTemplateDto {
 }
 export interface PaymentIntentResponse {
   clientSecret: string;
+  spaydPayload?: string;
 }
 
 export interface RegistrationInviteResponse {
@@ -111,6 +114,15 @@ export class ApiService {
     return this.http.get<Booking>(`${this.publicUrl}/properties/${propertyId}/bookings/${reference}`);
   }
 
+  getBookingByGate(propertyId: string, reference: string, lastName: string): Observable<Booking> {
+    return this.http.get<Booking>(`${this.publicUrl}/properties/${propertyId}/bookings/access`, {
+      params: {
+        reference,
+        lastName
+      }
+    });
+  }
+
   createBooking(dto: BookingDto): Observable<Booking> {
     return this.http.post<Booking>(`${this.hostUrl}/bookings`, dto);
   }
@@ -131,6 +143,13 @@ export class ApiService {
 
   exportLogbookCsv(propertyId: string, from?: string, to?: string): Observable<Blob> {
     return this.http.get(`${this.hostUrl}/properties/${propertyId}/logbook/export`, {
+      params: this.buildDateParams(from, to),
+      responseType: 'blob'
+    });
+  }
+
+  exportUbyportXml(propertyId: string, from?: string, to?: string): Observable<Blob> {
+    return this.http.get(`${this.hostUrl}/properties/${propertyId}/logbook/export/ubyport`, {
       params: this.buildDateParams(from, to),
       responseType: 'blob'
     });
@@ -186,6 +205,22 @@ export class ApiService {
 
   createOrder(dto: OrderDto): Observable<PaymentIntentResponse> {
     return this.http.post<PaymentIntentResponse>(`${this.guestUrl}/orders`, dto);
+  }
+
+  getPublicChat(bookingId: string): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.publicUrl}/bookings/${bookingId}/chat`);
+  }
+
+  getHostChat(bookingId: string): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.hostUrl}/bookings/${bookingId}/chat`);
+  }
+
+  sendGuestChatMessage(bookingId: string, messageText: string): Observable<ChatMessage> {
+    return this.http.post<ChatMessage>(`${this.publicUrl}/bookings/${bookingId}/chat`, { bookingId, messageText });
+  }
+
+  sendHostChatMessage(bookingId: string, messageText: string): Observable<ChatMessage> {
+    return this.http.post<ChatMessage>(`${this.hostUrl}/bookings/${bookingId}/chat`, { bookingId, messageText });
   }
 
   getMessages(propertyId: string): Observable<GuestMessage[]> {

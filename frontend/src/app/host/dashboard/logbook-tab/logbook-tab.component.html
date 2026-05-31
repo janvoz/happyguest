@@ -25,10 +25,16 @@
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
-    <button mat-flat-button color="primary" type="button" (click)="exportCsv()">
-      <mat-icon>download</mat-icon>
-      Export CSV
-    </button>
+    <div class="flex gap-2">
+      <button mat-flat-button color="primary" type="button" (click)="exportCsv()">
+        <mat-icon>download</mat-icon>
+        Export CSV
+      </button>
+      <button mat-stroked-button color="primary" type="button" (click)="exportUbyport()">
+        <mat-icon>verified_user</mat-icon>
+        Ubyport XML
+      </button>
+    </div>
   </div>
 
   <mat-card class="overflow-hidden rounded-3xl shadow-sm">

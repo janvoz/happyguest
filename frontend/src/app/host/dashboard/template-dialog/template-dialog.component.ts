@@ -15,6 +15,7 @@ export interface TemplateDialogData {
 })
 export class TemplateDialogComponent {
   readonly form: FormGroup;
+  readonly placeholders = ['{{guest_name}}', '{{check_in_date}}', '{{check_out_date}}', '{{door_code}}', '{{portal_link}}', '{{property_name}}'];
   readonly triggerOptions: Array<{ value: 'PRE_ARRIVAL' | 'POST_DEPARTURE'; label: string }> = [
     { value: 'PRE_ARRIVAL', label: 'Pre-arrival' },
     { value: 'POST_DEPARTURE', label: 'Post-departure' }
@@ -42,5 +43,12 @@ export class TemplateDialogComponent {
       propertyId: this.data.propertyId,
       ...this.form.getRawValue()
     });
+  }
+
+  appendPlaceholder(token: string): void {
+    const control = this.form.controls['htmlBody'];
+    const existing = String(control.value ?? '');
+    control.setValue(`${existing}${existing.endsWith(' ') || !existing ? '' : ' '}${token}`);
+    control.markAsDirty();
   }
 }

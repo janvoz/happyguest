@@ -49,6 +49,7 @@ public class PropertyService {
                 .checkoutChecklist(dto.getCheckoutChecklist())
                 .faqList(dto.getFaqList())
                 .mapMarkers(dto.getMapMarkers())
+                .quickContacts(dto.getQuickContacts())
                 .customDomain(dto.getCustomDomain())
                 .build();
         return propertyRepository.save(property);
@@ -66,6 +67,7 @@ public class PropertyService {
         existing.setCheckoutChecklist(dto.getCheckoutChecklist());
         existing.setFaqList(dto.getFaqList());
         existing.setMapMarkers(dto.getMapMarkers());
+        existing.setQuickContacts(dto.getQuickContacts());
         existing.setCustomDomain(dto.getCustomDomain());
         return propertyRepository.save(existing);
     }

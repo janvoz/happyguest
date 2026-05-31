@@ -31,7 +31,8 @@ public class OrderController {
         OrderProcessingService.OrderResult result = orderProcessingService.createOrder(request);
         return ResponseEntity.ok(Map.of(
                 "order", result.order(),
-                "clientSecret", result.clientSecret()
+                "clientSecret", result.clientSecret(),
+                "spaydPayload", result.spaydPayload()
         ));
     }
 

@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,9 +63,7 @@ public class RegistrationService {
     }
 
     public byte[] exportCsv(String propertyId, LocalDate from, LocalDate to) {
-        List<GuestRegistration> registrations = guestRegistrationRepository.findAllByPropertyId(propertyId).stream()
-                .filter(registration -> isWithinRange(registration.getCreatedAt(), from, to))
-                .toList();
+        List<GuestRegistration> registrations = getFilteredRegistrations(propertyId, from, to);
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              CSVWriter writer = new CSVWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
@@ -80,6 +79,45 @@ public class RegistrationService {
                         registration.getAddress(),
                         registration.getCreatedAt() == null ? "" : registration.getCreatedAt().toString()
                 });
+            }
+
+            public byte[] exportUbyportXml(String propertyId, LocalDate from, LocalDate to) {
+                List<GuestRegistration> registrations = getFilteredRegistrations(propertyId, from, to);
+                String body = registrations.stream()
+                        .map(registration -> "  <registration>"
+                                + "<bookingId>" + xmlEscape(registration.getBookingId()) + "</bookingId>"
+                                + "<propertyId>" + xmlEscape(registration.getPropertyId()) + "</propertyId>"
+                                + "<fullName>" + xmlEscape(registration.getFullName()) + "</fullName>"
+                                + "<dateOfBirth>" + xmlEscape(registration.getDateOfBirth() == null ? "" : registration.getDateOfBirth().toString()) + "</dateOfBirth>"
+                                + "<citizenship>" + xmlEscape(registration.getCitizenship()) + "</citizenship>"
+                                + "<documentNumber>" + xmlEscape(registration.getDocumentNumber()) + "</documentNumber>"
+                                + "<address>" + xmlEscape(registration.getAddress()) + "</address>"
+                                + "<createdAt>" + xmlEscape(registration.getCreatedAt() == null ? "" : registration.getCreatedAt().toString()) + "</createdAt>"
+                                + "</registration>")
+                        .collect(Collectors.joining("\n"));
+                String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ubyportExport>\n" + body + "\n</ubyportExport>\n";
+
+                registrations.forEach(registration -> registration.setUbyportStatus(GuestRegistration.UbyportStatus.SUBMITTED));
+                guestRegistrationRepository.saveAll(registrations);
+                return xml.getBytes(StandardCharsets.US_ASCII);
+            }
+
+            private List<GuestRegistration> getFilteredRegistrations(String propertyId, LocalDate from, LocalDate to) {
+                return guestRegistrationRepository.findAllByPropertyId(propertyId).stream()
+                        .filter(registration -> isWithinRange(registration.getCreatedAt(), from, to))
+                        .toList();
+            }
+
+            private String xmlEscape(String raw) {
+                if (raw == null) {
+                    return "";
+                }
+                return raw
+                        .replace("&", "&amp;")
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;")
+                        .replace("\"", "&quot;")
+                        .replace("'", "&apos;");
             }
             writer.flush();
             return outputStream.toByteArray();

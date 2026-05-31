@@ -2,6 +2,7 @@ package com.guesthost.controller;
 
 import com.guesthost.dto.GuestRegistrationDto;
 import com.guesthost.model.GuestRegistration;
+import com.guesthost.security.RequiresFeature;
 import com.guesthost.service.PropertyService;
 import com.guesthost.service.RegistrationService;
 import jakarta.validation.Valid;
@@ -55,6 +56,21 @@ public class RegistrationController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename("guest-logbook.csv").build().toString())
                 .contentType(MediaType.parseMediaType("text/csv"))
+                .body(payload);
+    }
+
+    @GetMapping("/api/host/properties/{propertyId}/logbook/export/ubyport")
+    @RequiresFeature("UBYPORT_SYNC")
+    public ResponseEntity<byte[]> exportUbyportByProperty(
+            Authentication authentication,
+            @PathVariable String propertyId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        propertyService.getOwnedProperty(authentication.getName(), propertyId);
+        byte[] payload = registrationService.exportUbyportXml(propertyId, from, to);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename("ubyport-export.xml").build().toString())
+                .contentType(MediaType.APPLICATION_XML)
                 .body(payload);
     }
 

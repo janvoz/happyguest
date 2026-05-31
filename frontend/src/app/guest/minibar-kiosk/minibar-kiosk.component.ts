@@ -17,6 +17,8 @@ export class MinibarKioskComponent implements OnChanges {
   showCheckout = false;
   paymentMessage = '';
   isProcessing = false;
+  paymentMethod: 'STRIPE' | 'QR_BANK' = 'STRIPE';
+  spaydPayload = '';
 
   constructor(
     private readonly apiService: ApiService,
@@ -55,18 +57,31 @@ export class MinibarKioskComponent implements OnChanges {
     this.apiService.createOrder({
       bookingId: this.bookingId,
       propertyId: this.propertyId,
-      items: this.cartItems.map(({ item, quantity }) => ({ minibarItemId: item.id, quantity }))
+      items: this.cartItems.map(({ item, quantity }) => ({ minibarItemId: item.id, quantity })),
+      paymentMethod: this.paymentMethod
     }).subscribe({
-      next: () => {
+      next: (response) => {
         this.isProcessing = false;
-        this.paymentMessage = `Payment of ${this.totalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} confirmed.`;
-        this.quantities = {};
-        this.showCheckout = false;
-        this.snackBar.open('Payment Successful', 'Dismiss', { duration: 4000 });
+        this.spaydPayload = response.spaydPayload ?? '';
+        if (this.paymentMethod === 'QR_BANK') {
+          this.paymentMessage = 'Bank QR generated. Scan and finish payment in your banking app.';
+          this.snackBar.open('SPAYD QR prepared', 'Dismiss', { duration: 4000 });
+        } else {
+          this.paymentMessage = `Payment of ${this.totalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} confirmed.`;
+          this.quantities = {};
+          this.showCheckout = false;
+          this.snackBar.open('Payment Successful', 'Dismiss', { duration: 4000 });
+        }
       },
       error: () => {
         this.isProcessing = false;
       }
     });
+  }
+
+  get spaydQrUrl(): string {
+    return this.spaydPayload
+      ? `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(this.spaydPayload)}`
+      : '';
   }
 }
