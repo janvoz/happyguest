@@ -73,22 +73,6 @@ export class LogbookTabComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    exportUbyport(): void {
-      if (!this.selectedPropertyId) {
-        return;
-      }
-
-      this.apiService.exportUbyportXml(this.selectedPropertyId, this.isoDate(this.fromDate), this.isoDate(this.toDate)).subscribe((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'ubyport-export.xml';
-        link.click();
-        URL.revokeObjectURL(url);
-        this.snackBar.open('Ubyport export generated.', 'Dismiss', { duration: 3000 });
-      });
-    }
-
     this.apiService.exportLogbookCsv(this.selectedPropertyId, this.isoDate(this.fromDate), this.isoDate(this.toDate)).subscribe((blob) => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -97,6 +81,22 @@ export class LogbookTabComponent implements OnInit, AfterViewInit {
       link.click();
       URL.revokeObjectURL(url);
       this.snackBar.open('CSV exported.', 'Dismiss', { duration: 3000 });
+    });
+  }
+
+  exportUbyport(): void {
+    if (!this.selectedPropertyId) {
+      return;
+    }
+
+    this.apiService.exportUbyportXml(this.selectedPropertyId, this.isoDate(this.fromDate), this.isoDate(this.toDate)).subscribe((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'ubyport-export.xml';
+      link.click();
+      URL.revokeObjectURL(url);
+      this.snackBar.open('Ubyport export generated.', 'Dismiss', { duration: 3000 });
     });
   }
 
