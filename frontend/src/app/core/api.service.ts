@@ -5,6 +5,7 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   Booking,
+  EmailTemplate,
   GuestMessage,
   GuestRegistration,
   GuideItem,
@@ -38,6 +39,12 @@ export interface OrderDto {
   bookingId: string;
   propertyId: string;
   items: Array<{ minibarItemId: string; quantity: number }>;
+}
+export interface EmailTemplateDto {
+  propertyId: string;
+  triggerType: 'PRE_ARRIVAL' | 'POST_DEPARTURE';
+  subject: string;
+  htmlBody: string;
 }
 export interface PaymentIntentResponse {
   clientSecret: string;
@@ -221,6 +228,22 @@ export class ApiService {
 
   getSubscriptionFeatures(): Observable<SubscriptionFeaturesResponse> {
     return this.http.get<SubscriptionFeaturesResponse>(`${this.hostUrl}/subscription/features`);
+  }
+
+  getTemplates(propertyId: string): Observable<EmailTemplate[]> {
+    return this.http.get<EmailTemplate[]>(`${this.hostUrl}/properties/${propertyId}/templates`);
+  }
+
+  createTemplate(dto: EmailTemplateDto): Observable<EmailTemplate> {
+    return this.http.post<EmailTemplate>(`${this.hostUrl}/templates`, dto);
+  }
+
+  updateTemplate(id: string, dto: EmailTemplateDto): Observable<EmailTemplate> {
+    return this.http.put<EmailTemplate>(`${this.hostUrl}/templates/${id}`, dto);
+  }
+
+  deleteTemplate(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.hostUrl}/templates/${id}`);
   }
 
   private buildDateParams(from?: string, to?: string): Record<string, string> {

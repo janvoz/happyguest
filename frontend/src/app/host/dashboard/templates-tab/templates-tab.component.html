@@ -1,0 +1,53 @@
+<div class="space-y-6">
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+    <div>
+      <h2 class="m-0 text-2xl font-semibold text-slate-900">Email Templates</h2>
+      <p class="m-0 mt-1 text-sm text-slate-500">Customise automated emails sent to guests before arrival and after departure.</p>
+    </div>
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <button mat-flat-button color="primary" type="button" (click)="openDialog()">
+        <mat-icon>add</mat-icon>
+        Add Template
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="overflow-hidden rounded-3xl shadow-sm">
+    <mat-card-content class="!p-0">
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" class="min-w-full">
+          <ng-container matColumnDef="triggerType">
+            <th mat-header-cell *matHeaderCellDef>Trigger</th>
+            <td mat-cell *matCellDef="let template">
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                    [class.bg-indigo-100]="template.triggerType === 'PRE_ARRIVAL'"
+                    [class.text-indigo-700]="template.triggerType === 'PRE_ARRIVAL'"
+                    [class.bg-amber-100]="template.triggerType === 'POST_DEPARTURE'"
+                    [class.text-amber-700]="template.triggerType === 'POST_DEPARTURE'">
+                {{ triggerLabel(template.triggerType) }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="subject">
+            <th mat-header-cell *matHeaderCellDef>Subject</th>
+            <td mat-cell *matCellDef="let template">{{ template.subject }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let template">
+              <div class="flex gap-2">
+                <button mat-stroked-button color="primary" type="button" (click)="openDialog(template)">Edit</button>
+                <button mat-stroked-button color="warn" type="button" (click)="deleteTemplate(template)">Delete</button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+        <div *ngIf="dataSource.data.length === 0" class="py-12 text-center text-sm text-slate-400">
+          No templates yet. Click "Add Template" to create your first email template.
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

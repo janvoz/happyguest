@@ -22,8 +22,9 @@ export class DashboardComponent implements OnInit {
     { label: 'Logbook', icon: 'description', tabIndex: 2 },
     { label: 'Guides', icon: 'menu_book', tabIndex: 3 },
     { label: 'Minibar', icon: 'local_bar', tabIndex: 4, requiredFeature: 'MINIBAR' },
-    { label: 'Finances & Billing', icon: 'payments', tabIndex: 5 },
-    { label: 'Messages', icon: 'chat', tabIndex: 6, isGlobal: true }
+    { label: 'Templates', icon: 'mark_email_read', tabIndex: 5 },
+    { label: 'Finances & Billing', icon: 'payments', tabIndex: 6 },
+    { label: 'Messages', icon: 'chat', tabIndex: 7, isGlobal: true }
   ];
   availableFeatures = new Set<string>();
   properties: Property[] = [];
@@ -60,7 +61,7 @@ export class DashboardComponent implements OnInit {
   }
 
   openTab(index: number): void {
-    this.selectedTabIndex = Math.min(index, 6);
+    this.selectedTabIndex = Math.min(index, 7);
     if (this.isMobile) {
       void this.sidenav?.close();
     }
