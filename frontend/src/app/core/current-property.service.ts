@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, Observable, tap } from 'rxjs';
 
 import { Property } from '../shared/models';
 import { ApiService } from './api.service';
@@ -12,7 +12,7 @@ export class CurrentPropertyService {
   private readonly selectedPropertyIdSubject = new BehaviorSubject<string>('');
 
   readonly properties$ = this.propertiesSubject.asObservable();
-  readonly selectedPropertyId$ = this.selectedPropertyIdSubject.asObservable();
+  readonly selectedPropertyId$ = this.selectedPropertyIdSubject.asObservable().pipe(distinctUntilChanged());
   readonly selectedProperty$ = combineLatest([this.properties$, this.selectedPropertyId$]).pipe(
     map(([properties, selectedPropertyId]) => properties.find((property) => property.id === selectedPropertyId) ?? null)
   );
@@ -26,7 +26,9 @@ export class CurrentPropertyService {
   }
 
   setSelectedProperty(propertyId: string): void {
-    this.selectedPropertyIdSubject.next(propertyId);
+    if (this.selectedPropertyIdSubject.value !== propertyId) {
+      this.selectedPropertyIdSubject.next(propertyId);
+    }
   }
 
   setProperties(properties: Property[]): void {

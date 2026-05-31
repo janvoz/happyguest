@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Document(collection = "bookings")
@@ -24,8 +25,10 @@ public class Booking {
     private String propertyId;
     private String guestName;
     private String guestEmail;
+    private String guestPhone;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
+    private BigDecimal totalPrice;
     private String doorCode;
     private boolean preArrivalSent;
     private boolean postDepartureSent;
@@ -36,10 +39,21 @@ public class Booking {
 
     private String bookingRefNumber;
     private BookingSource source;
+    private String externalReservationId;
+    private ChannelStatus channelStatus;
+    private LocalDateTime channelLastSyncedAt;
 
     public enum BookingSource {
         AIRBNB,
         BOOKING,
+        ICAL,
         MANUAL
+    }
+
+    public enum ChannelStatus {
+        PENDING,
+        CONFIRMED,
+        CANCELLED,
+        MODIFIED
     }
 }

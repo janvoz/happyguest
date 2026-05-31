@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, interval, Subscription } from 'rxjs';
 
 import { ApiService } from '../../../core/api.service';
+import { CurrentPropertyService } from '../../../core/current-property.service';
 import { ChatMessage, GuestMessage, Property } from '../../../shared/models';
 
 @Component({
@@ -20,9 +21,11 @@ export class MessagesTabComponent implements OnInit, OnDestroy {
   chatMessages: ChatMessage[] = [];
   readonly chatForm;
   private pollSub?: Subscription;
+  private propertiesSub?: Subscription;
 
   constructor(
     private readonly apiService: ApiService,
+    private readonly currentPropertyService: CurrentPropertyService,
     private readonly fb: FormBuilder,
     private readonly snackBar: MatSnackBar
   ) {
@@ -32,10 +35,11 @@ export class MessagesTabComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.apiService.getProperties().subscribe((properties) => {
+    this.propertiesSub = this.currentPropertyService.properties$.subscribe((properties) => {
       this.properties = properties;
       this.loadMessages();
     });
+    this.currentPropertyService.refreshProperties().subscribe();
   }
 
   loadMessages(): void {
@@ -96,5 +100,6 @@ export class MessagesTabComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.pollSub?.unsubscribe();
+    this.propertiesSub?.unsubscribe();
   }
 }

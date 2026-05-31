@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping
@@ -28,8 +29,24 @@ public class ChannelSyncController {
         return ResponseEntity.ok(channelSyncService.syncForProperty(authentication.getName(), propertyId));
     }
 
-    @PostMapping({"/api/webhooks/airbnb", "/api/webhooks/booking"})
-    public ResponseEntity<Map<String, String>> handleChannelWebhook(@RequestBody Map<String, Object> payload) {
-        return ResponseEntity.ok(Map.of("status", "accepted", "event", String.valueOf(payload.getOrDefault("event", "unknown"))));
+    @PostMapping("/api/webhooks/{channel}")
+    public ResponseEntity<Map<String, Object>> handleChannelWebhook(@PathVariable String channel, @RequestBody Map<String, Object> payload) {
+        Optional<Booking> syncedBooking = channelSyncService.syncWebhookReservation(channel, payload);
+        return ResponseEntity.ok(Map.of(
+                "status", "accepted",
+                "channel", channel,
+                "event", String.valueOf(payload.getOrDefault("event", "unknown")),
+                "syncedBookingId", syncedBooking.map(Booking::getId).orElse("")
+        ));
+    }
+
+    @PostMapping("/api/webhooks/airbnb")
+    public ResponseEntity<Map<String, Object>> handleAirbnbWebhook(@RequestBody Map<String, Object> payload) {
+        return handleChannelWebhook("airbnb", payload);
+    }
+
+    @PostMapping("/api/webhooks/booking")
+    public ResponseEntity<Map<String, Object>> handleBookingWebhook(@RequestBody Map<String, Object> payload) {
+        return handleChannelWebhook("booking", payload);
     }
 }

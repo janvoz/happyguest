@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
+import { Subject, takeUntil } from 'rxjs';
 
 import { ApiService, BookingDto } from '../../../core/api.service';
 import { CurrentPropertyService } from '../../../core/current-property.service';
@@ -12,13 +13,14 @@ import { BookingDialogComponent } from '../booking-dialog/booking-dialog.compone
   selector: 'app-bookings-tab',
   templateUrl: './bookings-tab.component.html'
 })
-export class BookingsTabComponent implements OnInit {
+export class BookingsTabComponent implements OnInit, OnDestroy {
   readonly displayedColumns = ['guestName', 'guestEmail', 'checkIn', 'checkOut', 'doorCode', 'status', 'actions'];
   readonly dataSource = new MatTableDataSource<Booking>([]);
   properties: Property[] = [];
   selectedPropertyId = '';
   isLoading = false;
   readonly inviteInProgress = new Set<string>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly apiService: ApiService,
@@ -28,13 +30,18 @@ export class BookingsTabComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentPropertyService.properties$.subscribe((properties) => {
+    this.currentPropertyService.properties$.pipe(takeUntil(this.destroy$)).subscribe((properties) => {
       this.properties = properties;
     });
-    this.currentPropertyService.selectedPropertyId$.subscribe((propertyId) => {
+    this.currentPropertyService.selectedPropertyId$.pipe(takeUntil(this.destroy$)).subscribe((propertyId) => {
       this.selectedPropertyId = propertyId;
       this.loadBookings();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadBookings(): void {
