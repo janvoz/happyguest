@@ -1,0 +1,35 @@
+<div class="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-2xl">
+    <mat-card class="rounded-3xl shadow-2xl">
+      <mat-card-header>
+        <mat-card-title>How was your stay?</mat-card-title>
+        <mat-card-subtitle *ngIf="booking">{{ booking.guestName }}, we’d love to hear about your experience.</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="space-y-4">
+        <div class="flex items-center gap-2 text-amber-500">
+          <button *ngFor="let star of stars" mat-icon-button type="button" (click)="setRating(star)">
+            <mat-icon>{{ rating >= star ? 'star' : 'star_border' }}</mat-icon>
+          </button>
+        </div>
+
+        <div *ngIf="rating >= 4" class="rounded-2xl bg-emerald-50 p-4 text-emerald-700">
+          Thank you! Redirecting you to leave a review...
+        </div>
+
+        <div *ngIf="rating > 0 && rating <= 3 && !submitted" class="space-y-4">
+          <form [formGroup]="form" class="space-y-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Tell us what we can improve</mat-label>
+              <textarea matInput rows="5" formControlName="feedback"></textarea>
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="button" (click)="submit()">Submit feedback</button>
+          </form>
+        </div>
+
+        <div *ngIf="submitted" class="rounded-2xl bg-indigo-50 p-4 text-indigo-700">
+          Thank you for your feedback.
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

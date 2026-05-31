@@ -1,0 +1,59 @@
+<div class="space-y-6">
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+    <div>
+      <h2 class="m-0 text-2xl font-semibold text-slate-900">Minibar</h2>
+      <p class="m-0 mt-1 text-sm text-slate-500">Control inventory, pricing, and guest-facing product listings.</p>
+    </div>
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <mat-form-field appearance="outline" class="min-w-[260px]">
+        <mat-label>Select property</mat-label>
+        <mat-select [(value)]="selectedPropertyId" (selectionChange)="loadItems()">
+          <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="openDialog()">
+        <mat-icon>add</mat-icon>
+        Add Item
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="overflow-hidden rounded-3xl shadow-sm">
+    <mat-card-content class="!p-0">
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" class="min-w-full">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>Price</th>
+            <td mat-cell *matCellDef="let item">{{ item.price | currency }}</td>
+          </ng-container>
+          <ng-container matColumnDef="stockCount">
+            <th mat-header-cell *matHeaderCellDef>Stock</th>
+            <td mat-cell *matCellDef="let item">{{ item.stockCount }}</td>
+          </ng-container>
+          <ng-container matColumnDef="imageUrl">
+            <th mat-header-cell *matHeaderCellDef>Image</th>
+            <td mat-cell *matCellDef="let item">
+              <a *ngIf="item.imageUrl" [href]="item.imageUrl" target="_blank" rel="noreferrer" class="text-indigo-600 hover:underline">View image</a>
+              <span *ngIf="!item.imageUrl">—</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="flex gap-2">
+                <button mat-stroked-button color="primary" type="button" (click)="openDialog(item)">Edit</button>
+                <button mat-stroked-button color="warn" type="button" (click)="deleteItem(item)">Delete</button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

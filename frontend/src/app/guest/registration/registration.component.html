@@ -1,0 +1,112 @@
+<mat-card class="mx-auto max-w-5xl rounded-3xl shadow-2xl">
+  <mat-card-header>
+    <mat-card-title>Guest registration</mat-card-title>
+    <mat-card-subtitle>Provide traveler information to unlock property access.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-stepper linear>
+      <mat-step [stepControl]="primaryGuestGroup" label="Primary guest">
+        <div [formGroup]="primaryGuestGroup" class="mt-4 grid gap-4 sm:grid-cols-2">
+          <mat-form-field appearance="outline" class="sm:col-span-2">
+            <mat-label>Full name</mat-label>
+            <input matInput formControlName="fullName">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date of birth</mat-label>
+            <input matInput [matDatepicker]="primaryDobPicker" formControlName="dateOfBirth">
+            <mat-datepicker-toggle matSuffix [for]="primaryDobPicker"></mat-datepicker-toggle>
+            <mat-datepicker #primaryDobPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Citizenship</mat-label>
+            <mat-select formControlName="citizenship">
+              <mat-option *ngFor="let country of countries" [value]="country">{{ country }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field *ngIf="primaryGuestGroup.get('citizenship')?.value === 'Other'" appearance="outline" class="sm:col-span-2">
+            <mat-label>Enter citizenship</mat-label>
+            <input matInput formControlName="citizenshipOther">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Document number</mat-label>
+            <input matInput formControlName="documentNumber">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="sm:col-span-2">
+            <mat-label>Address</mat-label>
+            <textarea matInput rows="2" formControlName="address"></textarea>
+          </mat-form-field>
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button mat-flat-button color="primary" matStepperNext type="button">Continue</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Additional guests">
+        <div class="mt-4 space-y-4">
+          <div *ngFor="let guest of additionalGuests.controls; let i = index" [formGroup]="guest" class="rounded-2xl border border-slate-200 p-4">
+            <div class="mb-3 flex items-center justify-between">
+              <h3 class="m-0 text-base font-semibold">Additional guest {{ i + 1 }}</h3>
+              <button mat-button color="warn" type="button" (click)="removeGuest(i)">Remove</button>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <mat-form-field appearance="outline" class="sm:col-span-2">
+                <mat-label>Full name</mat-label>
+                <input matInput formControlName="fullName">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Date of birth</mat-label>
+                <input matInput [matDatepicker]="guestDobPicker" formControlName="dateOfBirth">
+                <mat-datepicker-toggle matSuffix [for]="guestDobPicker"></mat-datepicker-toggle>
+                <mat-datepicker #guestDobPicker></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Citizenship</mat-label>
+                <mat-select formControlName="citizenship">
+                  <mat-option *ngFor="let country of countries" [value]="country">{{ country }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field *ngIf="guest.get('citizenship')?.value === 'Other'" appearance="outline" class="sm:col-span-2">
+                <mat-label>Enter citizenship</mat-label>
+                <input matInput formControlName="citizenshipOther">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Document number</mat-label>
+                <input matInput formControlName="documentNumber">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="sm:col-span-2">
+                <mat-label>Address</mat-label>
+                <textarea matInput rows="2" formControlName="address"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <button mat-stroked-button color="primary" type="button" (click)="addGuest()">
+            <mat-icon>person_add</mat-icon>
+            Add Guest
+          </button>
+        </div>
+        <div class="mt-6 flex justify-between">
+          <button mat-stroked-button matStepperPrevious type="button">Back</button>
+          <button mat-flat-button color="primary" matStepperNext type="button">Continue</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Review & submit">
+        <div class="mt-4 rounded-2xl bg-slate-50 p-5 text-sm text-slate-600">
+          Review all guest details carefully. Submitting will unlock access instructions for this stay.
+        </div>
+        <div class="mt-6 flex justify-between">
+          <button mat-stroked-button matStepperPrevious type="button">Back</button>
+          <button mat-flat-button color="primary" type="button" [disabled]="isSubmitting" (click)="submit()">
+            {{ isSubmitting ? 'Submitting...' : 'Submit Registration' }}
+          </button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  </mat-card-content>
+</mat-card>

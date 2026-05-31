@@ -1,0 +1,23 @@
+<mat-card class="rounded-3xl shadow-xl">
+  <mat-card-header>
+    <mat-card-title>Checkout checklist</mat-card-title>
+    <mat-card-subtitle>Finish these quick tasks before you leave.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content class="space-y-4">
+    <div *ngFor="let item of property.checkoutChecklist; let i = index" class="rounded-2xl bg-slate-50 px-4 py-3">
+      <mat-checkbox [(ngModel)]="checkedItems[i]">{{ item }}</mat-checkbox>
+    </div>
+
+    <div class="space-y-2">
+      <div class="flex items-center justify-between text-sm text-slate-500">
+        <span>Progress</span>
+        <span>{{ progress | number:'1.0-0' }}%</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+    </div>
+
+    <button *ngIf="allChecked" mat-flat-button color="primary" type="button" (click)="openReview()">
+      Submit & Leave Review
+    </button>
+  </mat-card-content>
+</mat-card>

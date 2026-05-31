@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>Add Booking</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="mt-4 grid gap-4 sm:grid-cols-2">
+    <mat-form-field appearance="outline" class="sm:col-span-2">
+      <mat-label>Property</mat-label>
+      <mat-select formControlName="propertyId">
+        <mat-option *ngFor="let property of data.properties" [value]="property.id">{{ property.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Guest name</mat-label>
+      <input matInput formControlName="guestName">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Guest email</mat-label>
+      <input matInput formControlName="guestEmail" type="email">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Check-in</mat-label>
+      <input matInput [matDatepicker]="checkInPicker" formControlName="checkIn">
+      <mat-datepicker-toggle matSuffix [for]="checkInPicker"></mat-datepicker-toggle>
+      <mat-datepicker #checkInPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Check-out</mat-label>
+      <input matInput [matDatepicker]="checkOutPicker" formControlName="checkOut">
+      <mat-datepicker-toggle matSuffix [for]="checkOutPicker"></mat-datepicker-toggle>
+      <mat-datepicker #checkOutPicker></mat-datepicker>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">Create Booking</button>
+</mat-dialog-actions>

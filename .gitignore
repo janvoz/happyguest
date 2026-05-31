@@ -1,0 +1,23 @@
+# ── OS / Editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# ── Environment secrets ───────────────────────────────────────────────────────
+.env
+
+# ── Backend (Maven / Java) ────────────────────────────────────────────────────
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/*.log
+
+# ── Frontend (Node / Angular) ─────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+*.tar

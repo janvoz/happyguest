@@ -1,0 +1,77 @@
+<div class="space-y-6">
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+    <div>
+      <h2 class="m-0 text-2xl font-semibold text-slate-900">Bookings</h2>
+      <p class="m-0 mt-1 text-sm text-slate-500">Coordinate arrivals, verify registration completion, and keep access details secure.</p>
+    </div>
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <mat-form-field appearance="outline" class="min-w-[260px]">
+        <mat-label>Select property</mat-label>
+        <mat-select [(value)]="selectedPropertyId" (selectionChange)="loadBookings()">
+          <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="openDialog()">
+        <mat-icon>add</mat-icon>
+        Add Booking
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="rounded-3xl bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-sm">
+    <mat-card-content class="grid gap-3 p-6 sm:grid-cols-[auto_1fr] sm:items-center">
+      <mat-icon class="!h-12 !w-12 !text-5xl">sync</mat-icon>
+      <div>
+        <div class="text-lg font-semibold">iCal Sync Status</div>
+        <p class="m-0 text-sm text-indigo-50">External calendars are refreshed automatically. Guest registration status gates door-code visibility inside the portal.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="overflow-hidden rounded-3xl shadow-sm">
+    <mat-card-content class="!p-0">
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" class="min-w-full">
+          <ng-container matColumnDef="guestName">
+            <th mat-header-cell *matHeaderCellDef>Guest</th>
+            <td mat-cell *matCellDef="let booking" class="font-medium">{{ booking.guestName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="guestEmail">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let booking">{{ booking.guestEmail }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="checkIn">
+            <th mat-header-cell *matHeaderCellDef>Check-in</th>
+            <td mat-cell *matCellDef="let booking">{{ booking.checkIn | date:'mediumDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="checkOut">
+            <th mat-header-cell *matHeaderCellDef>Check-out</th>
+            <td mat-cell *matCellDef="let booking">{{ booking.checkOut | date:'mediumDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="doorCode">
+            <th mat-header-cell *matHeaderCellDef>Door Code</th>
+            <td mat-cell *matCellDef="let booking">
+              <span class="font-mono text-sm">{{ booking.isRegistrationCompleted ? booking.doorCode : 'Locked until registration' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let booking">
+              <mat-chip [color]="booking.isRegistrationCompleted ? 'primary' : undefined" [highlighted]="true">
+                {{ booking.isRegistrationCompleted ? 'Registration complete' : 'Awaiting registration' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,38 @@
+<div class="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-5xl space-y-6">
+    <a [routerLink]="['/guest/portal', propertyId]" class="inline-flex items-center gap-2 text-sm text-indigo-300 no-underline hover:text-white">
+      <mat-icon>arrow_back</mat-icon>
+      Back to portal
+    </a>
+
+    <mat-card *ngIf="guide" class="rounded-3xl shadow-2xl">
+      <mat-card-content class="space-y-6 p-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h1 class="m-0 text-3xl font-bold text-slate-900">{{ guide.title }}</h1>
+            <p class="m-0 mt-2 text-sm text-slate-500">Follow each step carefully to get the most from your stay.</p>
+          </div>
+          <mat-form-field appearance="outline" class="min-w-[220px]">
+            <mat-label>Language</mat-label>
+            <mat-select [(value)]="selectedLanguage" (selectionChange)="translate()">
+              <mat-option *ngFor="let language of languages" [value]="language.value">{{ language.label }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div *ngIf="videoKind === 'youtube' || videoKind === 'vimeo'" class="overflow-hidden rounded-3xl bg-slate-900">
+          <iframe *ngIf="embedUrl" [src]="embedUrl" class="h-[420px] w-full border-0" allowfullscreen></iframe>
+        </div>
+        <div *ngIf="videoKind === 'mp4'" class="overflow-hidden rounded-3xl bg-slate-900">
+          <video [src]="guide.videoUrl" controls class="w-full"></video>
+        </div>
+
+        <div class="prose prose-slate max-w-none rounded-3xl bg-slate-50 p-6 text-slate-700" [innerHTML]="renderedContent"></div>
+
+        <div *ngIf="guide.photoUrls?.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <img *ngFor="let photo of guide.photoUrls" [src]="photo" [alt]="guide.title" class="h-48 w-full rounded-2xl object-cover">
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

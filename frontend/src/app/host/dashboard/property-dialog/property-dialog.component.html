@@ -1,0 +1,80 @@
+<h2 mat-dialog-title>{{ data ? 'Edit Property' : 'Add Property' }}</h2>
+<mat-dialog-content>
+  <mat-stepper linear>
+    <mat-step [stepControl]="basicsGroup" label="Property details">
+      <div [formGroup]="basicsGroup" class="mt-4 grid gap-4 sm:grid-cols-2">
+        <mat-form-field appearance="outline" class="sm:col-span-2">
+          <mat-label>Property name</mat-label>
+          <input matInput formControlName="name">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="sm:col-span-2">
+          <mat-label>Address</mat-label>
+          <textarea matInput rows="2" formControlName="address"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Wi-Fi name</mat-label>
+          <input matInput formControlName="wifiName">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Wi-Fi password</mat-label>
+          <input matInput formControlName="wifiPassword">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Airbnb review URL</mat-label>
+          <input matInput formControlName="airbnbReviewUrl">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Booking review URL</mat-label>
+          <input matInput formControlName="bookingReviewUrl">
+        </mat-form-field>
+      </div>
+      <div class="mt-6 flex justify-end">
+        <button mat-flat-button color="primary" matStepperNext type="button">Continue</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Automation & checkout">
+      <div class="mt-4 space-y-6">
+        <div>
+          <h3 class="mb-2 text-base font-semibold text-slate-900">iCal URLs</h3>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Add iCal feed</mat-label>
+            <mat-chip-grid #icalChipGrid aria-label="iCal URLs">
+              <mat-chip-row *ngFor="let url of icalUrls; let i = index" (removed)="removeIcal(i)">
+                {{ url }}
+                <button matChipRemove type="button"><mat-icon>cancel</mat-icon></button>
+              </mat-chip-row>
+            </mat-chip-grid>
+            <input matInput placeholder="Paste URL and press Enter" [matChipInputFor]="icalChipGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addIcal($event)">
+          </mat-form-field>
+        </div>
+
+        <div>
+          <h3 class="mb-2 text-base font-semibold text-slate-900">Checkout checklist</h3>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Add checklist item</mat-label>
+            <mat-chip-grid #checklistChipGrid aria-label="Checkout checklist">
+              <mat-chip-row *ngFor="let item of checkoutChecklist; let i = index" (removed)="removeChecklist(i)">
+                {{ item }}
+                <button matChipRemove type="button"><mat-icon>cancel</mat-icon></button>
+              </mat-chip-row>
+            </mat-chip-grid>
+            <input matInput placeholder="Type item and press Enter" [matChipInputFor]="checklistChipGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addChecklist($event)">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-between">
+        <button mat-stroked-button matStepperPrevious type="button">Back</button>
+        <button mat-flat-button color="primary" type="button" (click)="save()">Save Property</button>
+      </div>
+    </mat-step>
+  </mat-stepper>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Cancel</button>
+</mat-dialog-actions>

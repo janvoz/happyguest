@@ -1,0 +1,101 @@
+<div class="space-y-8">
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+    <div>
+      <h2 class="m-0 text-2xl font-semibold text-slate-900">Finances & Billing</h2>
+      <p class="m-0 mt-1 text-sm text-slate-500">Track minibar earnings, application fees, and subscription upgrades.</p>
+    </div>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <mat-form-field appearance="outline" class="min-w-[260px]">
+        <mat-label>Select property</mat-label>
+        <mat-select [(value)]="selectedPropertyId" (selectionChange)="loadOrders()">
+          <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-stroked-button color="primary" type="button" (click)="manageBilling()">Manage Billing</button>
+    </div>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-3">
+    <mat-card class="rounded-3xl shadow-sm">
+      <mat-card-content>
+        <div class="text-sm text-slate-500">Total Revenue</div>
+        <div class="mt-2 text-3xl font-bold text-slate-900">{{ totalRevenue | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="rounded-3xl shadow-sm">
+      <mat-card-content>
+        <div class="text-sm text-slate-500">Total Fees (2%)</div>
+        <div class="mt-2 text-3xl font-bold text-slate-900">{{ totalFees | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="rounded-3xl shadow-sm">
+      <mat-card-content>
+        <div class="text-sm text-slate-500">Host Net Payout</div>
+        <div class="mt-2 text-3xl font-bold text-emerald-600">{{ hostNetPayout | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="overflow-hidden rounded-3xl shadow-sm">
+    <mat-card-header>
+      <mat-card-title>Minibar Orders</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="!p-0">
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="orderRows" class="min-w-full">
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let order">{{ order.createdAt | date:'short' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="guestName">
+            <th mat-header-cell *matHeaderCellDef>Guest</th>
+            <td mat-cell *matCellDef="let order">{{ order.guestName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="totalAmount">
+            <th mat-header-cell *matHeaderCellDef>Total</th>
+            <td mat-cell *matCellDef="let order">{{ order.totalAmount | currency }}</td>
+          </ng-container>
+          <ng-container matColumnDef="applicationFee">
+            <th mat-header-cell *matHeaderCellDef>Application Fee</th>
+            <td mat-cell *matCellDef="let order">{{ order.applicationFee | currency }}</td>
+          </ng-container>
+          <ng-container matColumnDef="hostPayoutAmount">
+            <th mat-header-cell *matHeaderCellDef>Host Payout</th>
+            <td mat-cell *matCellDef="let order">{{ order.hostPayoutAmount | currency }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let order">
+              <mat-chip [highlighted]="true" [color]="order.status === 'PAID' ? 'primary' : undefined">{{ order.status }}</mat-chip>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div>
+    <div class="mb-4 flex items-center justify-between">
+      <div>
+        <h3 class="m-0 text-xl font-semibold text-slate-900">Subscription Plans</h3>
+        <p class="m-0 mt-1 text-sm text-slate-500">Upgrade to unlock more automation and monetization features.</p>
+      </div>
+    </div>
+    <div class="grid gap-4 lg:grid-cols-3">
+      <mat-card *ngFor="let plan of plans" class="rounded-3xl shadow-sm">
+        <mat-card-content class="flex h-full flex-col gap-4 p-6">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-wide text-indigo-600">{{ plan.tier }}</div>
+            <div class="mt-2 text-3xl font-bold text-slate-900">{{ plan.price }}</div>
+          </div>
+          <ul class="m-0 flex-1 space-y-2 pl-4 text-sm text-slate-600">
+            <li *ngFor="let feature of plan.features">{{ feature }}</li>
+          </ul>
+          <button mat-flat-button color="primary" type="button" (click)="upgrade(plan.tier)">Upgrade</button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
