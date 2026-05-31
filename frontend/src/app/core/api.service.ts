@@ -39,7 +39,7 @@ export interface GuestMessageDto {
 export interface OrderDto {
   bookingId: string;
   propertyId: string;
-  items: Array<{ minibarItemId: string; quantity: number }>;
+  items: Array<{ itemId: string; quantity: number }>;
   paymentMethod?: 'STRIPE' | 'QR_BANK';
 }
 export interface EmailTemplateDto {
@@ -75,7 +75,7 @@ export class ApiService {
   private readonly hostUrl = `${this.baseUrl}/host`;
   private readonly guestUrl = `${this.baseUrl}/guest`;
   private readonly publicUrl = `${this.baseUrl}/public`;
-  private readonly billingUrl = `${this.baseUrl}/billing`;
+  private readonly billingUrl = `${this.baseUrl}/host/billing`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -134,6 +134,10 @@ export class ApiService {
 
   updateBooking(id: string, dto: BookingDto): Observable<Booking> {
     return this.http.put<Booking>(`${this.hostUrl}/bookings/${id}`, dto);
+  }
+
+  deleteBooking(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.hostUrl}/bookings/${id}`);
   }
 
   getLogbook(propertyId: string, from?: string, to?: string): Observable<GuestRegistration[]> {

@@ -55,10 +55,10 @@ export class BookingsTabComponent implements OnInit {
     });
   }
 
-  openDialog(): void {
+  openDialog(booking?: Booking): void {
     const dialogRef = this.dialog.open(BookingDialogComponent, {
       width: '620px',
-      data: { properties: this.properties, propertyId: this.selectedPropertyId }
+      data: { properties: this.properties, propertyId: this.selectedPropertyId, booking }
     });
 
     dialogRef.afterClosed().subscribe((result: BookingDto | undefined) => {
@@ -66,12 +66,26 @@ export class BookingsTabComponent implements OnInit {
         return;
       }
 
-      this.apiService.createBooking(result).subscribe(() => {
-        this.snackBar.open('Booking created.', 'Dismiss', { duration: 3000 });
+      const request = booking
+        ? this.apiService.updateBooking(booking.id, result)
+        : this.apiService.createBooking(result);
+
+      request.subscribe(() => {
+        this.snackBar.open(booking ? 'Booking updated.' : 'Booking created.', 'Dismiss', { duration: 3000 });
         this.selectedPropertyId = result.propertyId ?? this.selectedPropertyId;
         this.currentPropertyService.setSelectedProperty(this.selectedPropertyId);
         this.loadBookings();
       });
+    });
+  }
+
+  deleteBooking(booking: Booking): void {
+    if (!confirm(`Delete booking for ${booking.guestName}?`)) {
+      return;
+    }
+    this.apiService.deleteBooking(booking.id).subscribe(() => {
+      this.snackBar.open('Booking deleted.', 'Dismiss', { duration: 3000 });
+      this.loadBookings();
     });
   }
 

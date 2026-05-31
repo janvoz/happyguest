@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Add Booking</h2>
+<h2 mat-dialog-title>{{ data.booking ? 'Edit Booking' : 'Add Booking' }}</h2>
 <mat-dialog-content>
   <form [formGroup]="form" class="mt-4 grid gap-4 sm:grid-cols-2">
     <mat-form-field appearance="outline" class="sm:col-span-2">
@@ -35,5 +35,5 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close type="button">Cancel</button>
-  <button mat-flat-button color="primary" type="button" (click)="save()">Create Booking</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">{{ data.booking ? 'Save Changes' : 'Create Booking' }}</button>
 </mat-dialog-actions>

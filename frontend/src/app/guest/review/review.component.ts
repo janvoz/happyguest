@@ -47,7 +47,7 @@ export class ReviewComponent implements OnInit {
     this.rating = value;
     if (value >= 4 && this.property) {
       setTimeout(() => {
-        window.location.href = this.property?.bookingReviewUrl || this.property?.airbnbReviewUrl || '/';
+        window.location.href = this.property?.airbnbReviewUrl || this.property?.bookingReviewUrl || '/';
       }, 2000);
     }
   }

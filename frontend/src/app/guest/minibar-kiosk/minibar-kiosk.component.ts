@@ -58,7 +58,7 @@ export class MinibarKioskComponent implements OnChanges {
     this.apiService.createOrder({
       bookingId: this.bookingId,
       propertyId: this.propertyId,
-      items: this.cartItems.map(({ item, quantity }) => ({ minibarItemId: item.id, quantity })),
+      items: this.cartItems.map(({ item, quantity }) => ({ itemId: item.id, quantity })),
       paymentMethod: this.paymentMethod
     }).subscribe({
       next: (response) => {

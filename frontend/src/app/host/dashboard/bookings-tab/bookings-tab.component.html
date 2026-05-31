@@ -65,15 +65,23 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Actions</th>
             <td mat-cell *matCellDef="let booking">
-              <button
-                mat-stroked-button
-                color="primary"
-                type="button"
-                (click)="sendRegistrationInvite(booking)"
-                [disabled]="!canSendInvite(booking)">
-                <mat-icon>mail</mat-icon>
-                {{ inviteInProgress.has(booking.id) ? 'Sending...' : 'Send invite' }}
-              </button>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  type="button"
+                  (click)="sendRegistrationInvite(booking)"
+                  [disabled]="!canSendInvite(booking)">
+                  <mat-icon>mail</mat-icon>
+                  {{ inviteInProgress.has(booking.id) ? 'Sending...' : 'Send invite' }}
+                </button>
+                <button mat-icon-button type="button" (click)="openDialog(booking)" aria-label="Edit booking">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" type="button" (click)="deleteBooking(booking)" aria-label="Delete booking">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
             </td>
           </ng-container>
 

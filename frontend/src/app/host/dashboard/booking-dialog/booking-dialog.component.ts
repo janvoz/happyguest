@@ -2,11 +2,12 @@ import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { Property } from '../../../shared/models';
+import { Booking, Property } from '../../../shared/models';
 
 interface BookingDialogData {
   properties: Property[];
   propertyId?: string;
+  booking?: Booking;
 }
 
 @Component({
@@ -21,12 +22,13 @@ export class BookingDialogComponent {
     private readonly dialogRef: MatDialogRef<BookingDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public readonly data: BookingDialogData
   ) {
+    const b = this.data.booking;
     this.form = this.fb.group({
-      propertyId: [this.data.propertyId ?? '', Validators.required],
-      guestName: ['', [Validators.required, Validators.minLength(2)]],
-      guestEmail: ['', [Validators.required, Validators.email]],
-      checkIn: [null as Date | null, Validators.required],
-      checkOut: [null as Date | null, Validators.required]
+      propertyId: [b?.propertyId ?? this.data.propertyId ?? '', Validators.required],
+      guestName: [b?.guestName ?? '', [Validators.required, Validators.minLength(2)]],
+      guestEmail: [b?.guestEmail ?? '', [Validators.required, Validators.email]],
+      checkIn: [b?.checkIn ? new Date(b.checkIn) : null as Date | null, Validators.required],
+      checkOut: [b?.checkOut ? new Date(b.checkOut) : null as Date | null, Validators.required]
     });
   }
 
