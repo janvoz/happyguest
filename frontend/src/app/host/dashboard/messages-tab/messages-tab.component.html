@@ -1,0 +1,83 @@
+<div class="space-y-6">
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+    <div>
+      <h2 class="m-0 text-2xl font-semibold text-slate-900">Guest Messages</h2>
+      <p class="m-0 mt-1 text-sm text-slate-500">Monitor issues, collect reviews, and keep response times low.</p>
+    </div>
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <mat-form-field appearance="outline" class="min-w-[220px]">
+        <mat-label>Select property</mat-label>
+        <mat-select [(value)]="selectedPropertyId" (selectionChange)="loadMessages()">
+          <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="min-w-[180px]">
+        <mat-label>Filter type</mat-label>
+        <mat-select [(value)]="filterType" (selectionChange)="applyFilter()">
+          <mat-option value="ALL">All</mat-option>
+          <mat-option value="ISSUE">Issue</mat-option>
+          <mat-option value="FEEDBACK">Feedback</mat-option>
+          <mat-option value="REVIEW">Review</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <mat-card class="overflow-hidden rounded-3xl shadow-sm">
+    <mat-card-content class="!p-0">
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="filteredMessages" class="min-w-full">
+          <ng-container matColumnDef="guestName">
+            <th mat-header-cell *matHeaderCellDef>Guest</th>
+            <td mat-cell *matCellDef="let message">{{ message.guestName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="messageType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let message">
+              <mat-chip [highlighted]="true" [color]="message.messageType === 'ISSUE' ? 'warn' : 'primary'">{{ message.messageType }}</mat-chip>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="content">
+            <th mat-header-cell *matHeaderCellDef>Content</th>
+            <td mat-cell *matCellDef="let message">{{ message.content | truncate:60 }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let message">
+              <div *ngIf="message.messageType === 'REVIEW'; else noRating" class="flex gap-0.5 text-amber-500">
+                <mat-icon *ngFor="let star of ratingStars(message.rating)">{{ star }}</mat-icon>
+              </div>
+              <ng-template #noRating>—</ng-template>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Received</th>
+            <td mat-cell *matCellDef="let message">{{ message.createdAt | date:'short' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="read">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let message">
+              <span class="font-medium" [class.text-emerald-600]="message.read" [class.text-amber-600]="!message.read">{{ message.read ? 'Read' : 'Unread' }}</span>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="selectMessage(row)" class="cursor-pointer hover:bg-slate-50"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="selectedMessage" class="rounded-3xl shadow-sm">
+    <mat-card-header>
+      <mat-card-title>{{ selectedMessage.guestName }} · {{ selectedMessage.messageType }}</mat-card-title>
+      <mat-card-subtitle>{{ selectedMessage.createdAt | date:'full' }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="space-y-3">
+      <p class="m-0 whitespace-pre-line text-slate-700">{{ selectedMessage.content }}</p>
+      <div *ngIf="selectedMessage.messageType === 'REVIEW'" class="flex gap-1 text-amber-500">
+        <mat-icon *ngFor="let star of ratingStars(selectedMessage.rating)">{{ star }}</mat-icon>
+      </div>
+      <div class="text-sm text-slate-500">Booking ID: {{ selectedMessage.bookingId }}</div>
+    </mat-card-content>
+  </mat-card>
+</div>

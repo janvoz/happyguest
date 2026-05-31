@@ -1,0 +1,68 @@
+<div class="space-y-4">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="m-0 text-2xl font-semibold text-white">Minibar kiosk</h2>
+      <p class="m-0 mt-1 text-sm text-slate-300">Order snacks, drinks, and essentials directly from your room.</p>
+    </div>
+    <button mat-fab color="primary" type="button" class="!fixed bottom-6 right-6 z-30" [matBadge]="cartCount" matBadgeColor="warn" (click)="showCheckout = true">
+      <mat-icon>shopping_cart</mat-icon>
+    </button>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <mat-card *ngFor="let item of items" class="rounded-3xl shadow-xl">
+      <img [src]="item.imageUrl || 'https://via.placeholder.com/400x240?text=Minibar'" [alt]="item.name" class="h-48 w-full rounded-t-3xl object-cover">
+      <mat-card-content class="space-y-3 p-5">
+        <div>
+          <div class="text-lg font-semibold text-slate-900">{{ item.name }}</div>
+          <div class="text-sm text-slate-500">{{ item.price | currency }}</div>
+        </div>
+        <div class="flex items-center justify-between rounded-2xl bg-slate-100 px-3 py-2">
+          <button mat-icon-button type="button" (click)="changeQuantity(item.id, -1)"><mat-icon>remove</mat-icon></button>
+          <span class="text-lg font-semibold text-slate-900">{{ quantities[item.id] || 0 }}</span>
+          <button mat-icon-button color="primary" type="button" (click)="changeQuantity(item.id, 1)"><mat-icon>add</mat-icon></button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="showCheckout" class="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70 px-4">
+    <mat-card class="w-full max-w-2xl rounded-3xl shadow-2xl">
+      <mat-card-header>
+        <mat-card-title>Order summary</mat-card-title>
+        <mat-card-subtitle>Review your minibar purchase before confirming payment.</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="space-y-4">
+        <div *ngFor="let entry of cartItems" class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+          <div>
+            <div class="font-semibold text-slate-900">{{ entry.item.name }}</div>
+            <div class="text-sm text-slate-500">Qty {{ entry.quantity }}</div>
+          </div>
+          <div class="font-semibold text-slate-900">{{ entry.item.price * entry.quantity | currency }}</div>
+        </div>
+        <div class="flex items-center justify-between border-t border-slate-200 pt-4 text-lg font-bold text-slate-900">
+          <span>Total</span>
+          <span>{{ totalAmount | currency }}</span>
+        </div>
+        <!-- TODO: integrate @stripe/stripe-js here -->
+        <div class="rounded-2xl bg-indigo-50 p-4 text-sm text-indigo-700">A hosted checkout flow will be displayed here after Stripe Elements integration.</div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-button type="button" (click)="showCheckout = false">Cancel</button>
+        <button mat-flat-button color="primary" type="button" [disabled]="!cartCount || isProcessing" (click)="checkout()">
+          {{ isProcessing ? 'Processing...' : 'Checkout' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <mat-card *ngIf="paymentMessage" class="rounded-3xl border border-emerald-200 bg-emerald-50 shadow-lg">
+    <mat-card-content class="flex items-center gap-3 p-5 text-emerald-800">
+      <mat-icon>check_circle</mat-icon>
+      <div>
+        <div class="font-semibold">Payment Successful</div>
+        <div>{{ paymentMessage }}</div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

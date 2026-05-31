@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>How was your stay?</h2>
+<mat-dialog-content class="space-y-4">
+  <div class="flex items-center gap-2 text-amber-500">
+    <button *ngFor="let star of stars" mat-icon-button type="button" (click)="setRating(star)">
+      <mat-icon>{{ rating >= star ? 'star' : 'star_border' }}</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="rating >= 4" class="rounded-2xl bg-emerald-50 p-4 text-emerald-700">
+    Thank you! Redirecting you to leave a review...
+  </div>
+
+  <div *ngIf="rating > 0 && rating <= 3 && !submitted" class="space-y-4">
+    <form [formGroup]="form" class="space-y-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Tell us what happened</mat-label>
+        <textarea matInput rows="5" formControlName="feedback"></textarea>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="submit()">Send feedback</button>
+    </form>
+  </div>
+
+  <div *ngIf="submitted" class="rounded-2xl bg-indigo-50 p-4 text-indigo-700">
+    Thank you for your feedback.
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Close</button>
+</mat-dialog-actions>

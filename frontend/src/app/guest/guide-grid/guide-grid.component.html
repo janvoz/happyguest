@@ -1,0 +1,20 @@
+<div class="space-y-4">
+  <div>
+    <h2 class="m-0 text-2xl font-semibold text-white">Home guides</h2>
+    <p class="m-0 mt-1 text-sm text-slate-300">Tap any guide for appliance instructions, videos, and quick troubleshooting tips.</p>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <a *ngFor="let guide of guides" [routerLink]="['/guest/portal', propertyId, 'guide', guide.slug]" class="no-underline">
+      <mat-card class="h-full rounded-3xl border border-white/10 !bg-white/5 text-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl">
+        <mat-card-content class="flex h-full flex-col gap-4 p-6">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+            <mat-icon class="!text-3xl">smart_display</mat-icon>
+          </div>
+          <div class="text-lg font-semibold">{{ guide.title }}</div>
+          <div class="text-sm text-slate-300">Step-by-step instructions and support resources.</div>
+        </mat-card-content>
+      </mat-card>
+    </a>
+  </div>
+</div>

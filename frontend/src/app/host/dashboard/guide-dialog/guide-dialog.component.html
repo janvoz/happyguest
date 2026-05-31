@@ -1,0 +1,33 @@
+<h2 mat-dialog-title>{{ data.guide ? 'Edit Guide' : 'Add Guide' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="mt-4 grid gap-4">
+    <mat-form-field appearance="outline">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Slug</mat-label>
+      <input matInput formControlName="slug">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Content (Markdown)</mat-label>
+      <textarea matInput rows="8" formControlName="contentMarkdown"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Video URL</mat-label>
+      <input matInput formControlName="videoUrl">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Display order</mat-label>
+      <input matInput type="number" formControlName="displayOrder">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">Save Guide</button>
+</mat-dialog-actions>

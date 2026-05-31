@@ -1,0 +1,59 @@
+<mat-sidenav-container class="min-h-screen bg-slate-100">
+  <mat-sidenav #drawer [mode]="isMobile ? 'over' : 'side'" [opened]="!isMobile" class="w-72 !border-r !border-slate-200 !bg-slate-950 !text-white">
+    <div class="flex h-full flex-col">
+      <div class="border-b border-white/10 px-6 py-5">
+        <div class="text-2xl font-bold">GuestHost</div>
+        <div class="mt-2 text-sm text-slate-300">{{ currentUserEmail }}</div>
+      </div>
+
+      <mat-nav-list class="!pt-2">
+        <a mat-list-item *ngFor="let item of navItems; let i = index" (click)="openTab(i)" class="!text-slate-200 hover:!bg-white/5">
+          <mat-icon matListItemIcon class="!text-slate-200" [matBadge]="item.label === 'Messages' && unreadMessages ? unreadMessages : null" matBadgeColor="warn">{{ item.icon }}</mat-icon>
+          <span matListItemTitle class="!text-slate-200">{{ item.label }}</span>
+        </a>
+      </mat-nav-list>
+
+      <div class="mt-auto border-t border-white/10 px-6 py-5 text-sm text-slate-400">
+        Guest experience automation for modern hosts.
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" class="sticky top-0 z-20 flex !h-16 items-center gap-4 shadow-md">
+      <button *ngIf="isMobile" mat-icon-button type="button" (click)="toggleSidenav()" aria-label="Toggle navigation">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <div>
+        <div class="text-lg font-semibold">Host Dashboard</div>
+        <div class="text-xs opacity-80">Operational control center for every stay</div>
+      </div>
+    </mat-toolbar>
+
+    <div class="p-4 sm:p-6">
+      <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabIndex = $event" class="rounded-3xl bg-white p-2 shadow-sm">
+        <mat-tab label="Properties">
+          <div class="p-4"><app-properties-tab></app-properties-tab></div>
+        </mat-tab>
+        <mat-tab label="Bookings">
+          <div class="p-4"><app-bookings-tab></app-bookings-tab></div>
+        </mat-tab>
+        <mat-tab label="Logbook">
+          <div class="p-4"><app-logbook-tab></app-logbook-tab></div>
+        </mat-tab>
+        <mat-tab label="Guides">
+          <div class="p-4"><app-guides-tab></app-guides-tab></div>
+        </mat-tab>
+        <mat-tab label="Minibar">
+          <div class="p-4"><app-minibar-tab></app-minibar-tab></div>
+        </mat-tab>
+        <mat-tab label="Finances">
+          <div class="p-4"><app-finances-tab></app-finances-tab></div>
+        </mat-tab>
+        <mat-tab label="Messages">
+          <div class="p-4"><app-messages-tab></app-messages-tab></div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

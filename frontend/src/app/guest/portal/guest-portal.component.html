@@ -1,0 +1,67 @@
+<div class="min-h-screen bg-slate-950 px-4 py-6 text-white sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl space-y-8">
+    <div class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div class="text-sm uppercase tracking-[0.3em] text-indigo-200">Guest Portal</div>
+          <h1 class="m-0 mt-2 text-3xl font-bold">{{ property?.name || 'Your stay with GuestHost' }}</h1>
+          <p class="m-0 mt-2 max-w-2xl text-slate-300">Access your door code, Wi-Fi, appliance guides, minibar ordering, and checkout checklist all in one place.</p>
+        </div>
+        <div *ngIf="property" class="rounded-2xl bg-white/10 px-4 py-3 text-sm text-slate-200">{{ property.address }}</div>
+      </div>
+    </div>
+
+    <mat-card *ngIf="!bookingId && !isLoading" class="mx-auto max-w-xl rounded-3xl shadow-2xl">
+      <mat-card-header>
+        <mat-card-title>Enter your booking reference</mat-card-title>
+        <mat-card-subtitle>We’ll use it to personalize your guest portal.</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="bookingReferenceForm" (ngSubmit)="submitBookingReference()" class="mt-4 flex flex-col gap-4 sm:flex-row">
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Booking reference</mat-label>
+            <input matInput formControlName="bookingReference" placeholder="e.g. GH-BOOK-1024">
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit" class="!h-14">Continue</button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <div *ngIf="booking && !booking.isRegistrationCompleted && !showRegistrationForm" class="mx-auto max-w-3xl">
+      <mat-card class="rounded-3xl border border-amber-400/30 bg-white/95 text-slate-900 shadow-2xl">
+        <mat-card-content class="flex flex-col items-center gap-4 px-8 py-10 text-center">
+          <mat-icon class="!h-20 !w-20 !text-[80px] !text-amber-500">lock</mat-icon>
+          <h2 class="m-0 text-3xl font-bold">Action Required</h2>
+          <p class="m-0 max-w-xl text-slate-600">Complete the guest registration form to reveal your Door Code and Wi-Fi password.</p>
+          <button mat-flat-button color="primary" type="button" class="!mt-2 !h-12 !px-8" (click)="revealRegistration()">Register Now</button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <app-registration
+      *ngIf="booking && !booking.isRegistrationCompleted && showRegistrationForm"
+      [bookingId]="booking.id"
+      [propertyId]="propertyId"
+      (registered)="handleRegistered()">
+    </app-registration>
+
+    <div *ngIf="booking && booking.isRegistrationCompleted && property" class="space-y-8">
+      <mat-card class="rounded-3xl bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-xl">
+        <mat-card-content class="grid gap-3 p-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <div class="text-sm uppercase tracking-[0.3em] text-indigo-100">Welcome</div>
+            <div class="mt-2 text-3xl font-bold">Hi {{ booking.guestName }}, your stay is ready.</div>
+            <p class="m-0 mt-2 text-sm text-indigo-50">Everything you need—from access details to how-to guides—is available below.</p>
+          </div>
+          <div class="rounded-2xl bg-white/10 px-4 py-3 text-sm">Check-out: {{ booking.checkOut | date:'fullDate' }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <app-access-card [booking]="booking" [property]="property"></app-access-card>
+      <app-guide-grid [propertyId]="propertyId"></app-guide-grid>
+      <app-minibar-kiosk [propertyId]="propertyId" [bookingId]="booking.id"></app-minibar-kiosk>
+      <app-checkout-checklist [property]="property" [bookingId]="booking.id"></app-checkout-checklist>
+      <app-message-box [propertyId]="propertyId" [bookingId]="booking.id" [guestName]="booking.guestName"></app-message-box>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/guesthost}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    protocol: ${MAIL_PROTOCOL:smtp}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
+      mail.smtp.ssl.enable: ${MAIL_SMTP_SSL_ENABLE:false}
+      mail.smtp.auth.mechanisms: ${MAIL_SMTP_AUTH_MECHANISMS:LOGIN PLAIN}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:changeme-super-secret-key-at-least-32-chars}
+    expiration-ms: 86400000
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    application-fee-percent: 2
+  google:
+    translate-api-key: ${GOOGLE_TRANSLATE_API_KEY:}
+  fastspring:
+    webhook-secret: ${FASTSPRING_WEBHOOK_SECRET:}
+  mail:
+    sender: ${MAIL_SENDER:${MAIL_USERNAME:}}
+    sender-name: ${MAIL_SENDER_NAME:Message from Staclo.host}
