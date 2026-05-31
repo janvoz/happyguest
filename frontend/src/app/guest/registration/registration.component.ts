@@ -75,7 +75,11 @@ export class RegistrationComponent {
       fullName: ['', Validators.required],
       dateOfBirth: [null as Date | null, Validators.required],
       citizenship: ['US', Validators.required],
+      documentType: ['PASSPORT', Validators.required],
       documentNumber: ['', Validators.required],
+      documentIssuingCountry: [''],
+      documentExpiry: [null as Date | null],
+      gender: [''],
       address: ['', Validators.required]
     });
   }
@@ -89,16 +93,25 @@ export class RegistrationComponent {
         );
   }
 
-  private normalizeGuest(group: FormGroup): { fullName: string; dateOfBirth: string; citizenship: string; documentNumber: string; address: string } {
+  private normalizeGuest(group: FormGroup): {
+    fullName: string; dateOfBirth: string; citizenship: string;
+    documentType: string; documentNumber: string; documentIssuingCountry: string;
+    documentExpiry: string; gender: string; address: string
+  } {
     const value = group.getRawValue();
-    const date = value.dateOfBirth instanceof Date
-      ? `${value.dateOfBirth.getFullYear()}-${String(value.dateOfBirth.getMonth() + 1).padStart(2, '0')}-${String(value.dateOfBirth.getDate()).padStart(2, '0')}`
-      : '';
+    const dobDate = value.dateOfBirth instanceof Date ? value.dateOfBirth : null;
+    const expiryDate = value.documentExpiry instanceof Date ? value.documentExpiry : null;
+    const formatDate = (d: Date | null): string =>
+      d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
     return {
       fullName: String(value.fullName ?? ''),
-      dateOfBirth: date,
+      dateOfBirth: formatDate(dobDate),
       citizenship: String(value.citizenship ?? ''),
+      documentType: String(value.documentType ?? 'PASSPORT'),
       documentNumber: String(value.documentNumber ?? ''),
+      documentIssuingCountry: String(value.documentIssuingCountry ?? ''),
+      documentExpiry: formatDate(expiryDate),
+      gender: String(value.gender ?? ''),
       address: String(value.address ?? '')
     };
   }

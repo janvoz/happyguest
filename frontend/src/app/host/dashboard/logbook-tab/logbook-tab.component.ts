@@ -16,13 +16,14 @@ export class LogbookTabComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator?: MatPaginator;
   @ViewChild(MatSort) sort?: MatSort;
 
-  readonly displayedColumns = ['fullName', 'dateOfBirth', 'citizenship', 'documentNumber', 'address', 'createdAt'];
+  readonly displayedColumns = ['fullName', 'dateOfBirth', 'citizenship', 'documentNumber', 'address', 'ubyportStatus', 'createdAt'];
   readonly dataSource = new MatTableDataSource<GuestRegistration>([]);
   properties: Property[] = [];
   selectedPropertyId = '';
   fromDate: Date | null = null;
   toDate: Date | null = null;
   searchTerm = '';
+  isSubmitting = false;
 
   constructor(
     private readonly apiService: ApiService,
@@ -97,6 +98,24 @@ export class LogbookTabComponent implements OnInit, AfterViewInit {
       link.click();
       URL.revokeObjectURL(url);
       this.snackBar.open('Ubyport export generated.', 'Dismiss', { duration: 3000 });
+    });
+  }
+
+  submitUbyport(): void {
+    if (!this.selectedPropertyId) {
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.apiService.submitUbyport(this.selectedPropertyId, this.isoDate(this.fromDate), this.isoDate(this.toDate)).subscribe({
+      next: (result) => {
+        this.isSubmitting = false;
+        this.snackBar.open(result.message, 'Dismiss', { duration: 5000 });
+        this.loadLogbook();
+      },
+      error: () => {
+        this.isSubmitting = false;
+      }
     });
   }
 

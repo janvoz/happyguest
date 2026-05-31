@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ApiService } from '../../../core/api.service';
@@ -14,7 +15,7 @@ interface OrderRow extends MinibarOrder {
   templateUrl: './finances-tab.component.html'
 })
 export class FinancesTabComponent implements OnInit {
-  readonly displayedColumns = ['createdAt', 'guestName', 'totalAmount', 'applicationFee', 'hostPayoutAmount', 'status'];
+  readonly displayedColumns = ['createdAt', 'guestName', 'totalAmount', 'applicationFee', 'hostPayoutAmount', 'status', 'paymentMethod', 'variableSymbol'];
   readonly plans = [
     {
       tier: 'FREE' as const,
@@ -38,12 +39,21 @@ export class FinancesTabComponent implements OnInit {
   totalRevenue = 0;
   totalFees = 0;
   hostNetPayout = 0;
+  isSavingBank = false;
+
+  readonly bankForm: FormGroup;
 
   constructor(
     private readonly apiService: ApiService,
     private readonly currentPropertyService: CurrentPropertyService,
-    private readonly snackBar: MatSnackBar
-  ) {}
+    private readonly snackBar: MatSnackBar,
+    private readonly fb: FormBuilder
+  ) {
+    this.bankForm = this.fb.group({
+      iban: [''],
+      swift: ['']
+    });
+  }
 
   ngOnInit(): void {
     this.currentPropertyService.properties$.subscribe((properties) => {
@@ -52,6 +62,9 @@ export class FinancesTabComponent implements OnInit {
     this.currentPropertyService.selectedPropertyId$.subscribe((propertyId) => {
       this.selectedPropertyId = propertyId;
       this.loadOrders();
+    });
+    this.apiService.getProfile().subscribe((profile) => {
+      this.bankForm.patchValue({ iban: profile.iban ?? '', swift: profile.swift ?? '' });
     });
   }
 
@@ -71,6 +84,19 @@ export class FinancesTabComponent implements OnInit {
         }));
         this.calculateSummary();
       });
+    });
+  }
+
+  saveBankDetails(): void {
+    this.isSavingBank = true;
+    this.apiService.updateProfile(this.bankForm.value).subscribe({
+      next: () => {
+        this.isSavingBank = false;
+        this.snackBar.open('Bank details saved.', 'Dismiss', { duration: 3000 });
+      },
+      error: () => {
+        this.isSavingBank = false;
+      }
     });
   }
 

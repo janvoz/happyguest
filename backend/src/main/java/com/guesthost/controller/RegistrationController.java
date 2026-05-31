@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -89,5 +90,16 @@ public class RegistrationController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename("guest-logbook.csv").build().toString())
                 .contentType(MediaType.parseMediaType("text/csv"))
                 .body(payload);
+    }
+
+    @PostMapping("/api/host/properties/{propertyId}/logbook/ubyport/submit")
+    @RequiresFeature("UBYPORT_SYNC")
+    public ResponseEntity<Map<String, Object>> submitUbyportByProperty(
+            Authentication authentication,
+            @PathVariable String propertyId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        propertyService.getOwnedProperty(authentication.getName(), propertyId);
+        return ResponseEntity.ok(registrationService.submitUbyport(propertyId, from, to));
     }
 }

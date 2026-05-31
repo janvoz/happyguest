@@ -20,6 +20,14 @@ public class GuestRegistrantDto {
     @NotBlank(message = "Document number is required")
     private String documentNumber;
 
+    private String documentType;
+
+    private String documentIssuingCountry;
+
+    private LocalDate documentExpiry;
+
+    private String gender;
+
     @NotBlank(message = "Address is required")
     private String address;
 }

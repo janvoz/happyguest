@@ -67,6 +67,19 @@ export interface SubscriptionFeaturesResponse {
   features: string[];
 }
 
+export interface HostProfile {
+  email: string;
+  name: string;
+  iban: string;
+  swift: string;
+}
+
+export interface UbyportSubmitResponse {
+  status: string;
+  submittedCount: number;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -158,6 +171,22 @@ export class ApiService {
       params: this.buildDateParams(from, to),
       responseType: 'blob'
     });
+  }
+
+  submitUbyport(propertyId: string, from?: string, to?: string): Observable<UbyportSubmitResponse> {
+    return this.http.post<UbyportSubmitResponse>(
+      `${this.hostUrl}/properties/${propertyId}/logbook/ubyport/submit`,
+      {},
+      { params: this.buildDateParams(from, to) }
+    );
+  }
+
+  getProfile(): Observable<HostProfile> {
+    return this.http.get<HostProfile>(`${this.hostUrl}/profile`);
+  }
+
+  updateProfile(dto: Partial<HostProfile>): Observable<HostProfile> {
+    return this.http.put<HostProfile>(`${this.hostUrl}/profile`, dto);
   }
 
   getGuides(propertyId: string): Observable<GuideItem[]> {

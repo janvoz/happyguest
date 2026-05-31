@@ -34,6 +34,10 @@
         <mat-icon>verified_user</mat-icon>
         Ubyport XML
       </button>
+      <button mat-flat-button color="accent" type="button" [disabled]="isSubmitting" (click)="submitUbyport()">
+        <mat-icon>send</mat-icon>
+        {{ isSubmitting ? 'Submitting...' : 'Submit to Ubyport' }}
+      </button>
     </div>
   </div>
 
@@ -60,6 +64,14 @@
           <ng-container matColumnDef="address">
             <th mat-header-cell *matHeaderCellDef>Address</th>
             <td mat-cell *matCellDef="let row">{{ row.address }}</td>
+          </ng-container>
+          <ng-container matColumnDef="ubyportStatus">
+            <th mat-header-cell *matHeaderCellDef>Ubyport</th>
+            <td mat-cell *matCellDef="let row">
+              <mat-chip [highlighted]="true" [color]="row.ubyportStatus === 'SUBMITTED' ? 'primary' : undefined">
+                {{ row.ubyportStatus ?? 'PENDING' }}
+              </mat-chip>
+            </td>
           </ng-container>
           <ng-container matColumnDef="createdAt">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Registered</th>

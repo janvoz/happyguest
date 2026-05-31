@@ -26,6 +26,10 @@ public class GuestRegistration {
     private LocalDate dateOfBirth;
     private String citizenship;
     private String documentNumber;
+    private String documentType;
+    private String documentIssuingCountry;
+    private LocalDate documentExpiry;
+    private String gender;
     private String address;
     private UbyportStatus ubyportStatus;
     private Instant createdAt;
