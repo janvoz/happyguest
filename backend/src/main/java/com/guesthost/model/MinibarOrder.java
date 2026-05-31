@@ -33,11 +33,18 @@ public class MinibarOrder {
     private BigDecimal hostPayoutAmount;
     private OrderStatus status;
     private String stripePaymentIntentId;
+    private String variableSymbol;
+    private PaymentMethod paymentMethod;
     private Instant createdAt;
 
     public enum OrderStatus {
         PENDING,
         PAID,
         REFUNDED
+    }
+
+    public enum PaymentMethod {
+        STRIPE,
+        QR_BANK
     }
 }

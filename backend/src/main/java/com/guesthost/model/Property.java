@@ -39,5 +39,32 @@ public class Property {
     @Builder.Default
     private List<String> checkoutChecklist = new ArrayList<>();
 
+    @Builder.Default
+    private List<FaqItem> faqList = new ArrayList<>();
+
+    @Builder.Default
+    private List<MapMarker> mapMarkers = new ArrayList<>();
+
     private String customDomain;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FaqItem {
+        private String question;
+        private String answer;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MapMarker {
+        private String title;
+        private String category;
+        private String description;
+        private Double latitude;
+        private Double longitude;
+    }
 }

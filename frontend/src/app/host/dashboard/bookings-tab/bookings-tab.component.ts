@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { ApiService, BookingDto } from '../../../core/api.service';
+import { CurrentPropertyService } from '../../../core/current-property.service';
 import { Booking, Property } from '../../../shared/models';
 import { BookingDialogComponent } from '../booking-dialog/booking-dialog.component';
 
@@ -21,17 +22,18 @@ export class BookingsTabComponent implements OnInit {
 
   constructor(
     private readonly apiService: ApiService,
+    private readonly currentPropertyService: CurrentPropertyService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.apiService.getProperties().subscribe((properties) => {
+    this.currentPropertyService.properties$.subscribe((properties) => {
       this.properties = properties;
-      this.selectedPropertyId = properties[0]?.id ?? '';
-      if (this.selectedPropertyId) {
-        this.loadBookings();
-      }
+    });
+    this.currentPropertyService.selectedPropertyId$.subscribe((propertyId) => {
+      this.selectedPropertyId = propertyId;
+      this.loadBookings();
     });
   }
 
@@ -67,6 +69,7 @@ export class BookingsTabComponent implements OnInit {
       this.apiService.createBooking(result).subscribe(() => {
         this.snackBar.open('Booking created.', 'Dismiss', { duration: 3000 });
         this.selectedPropertyId = result.propertyId ?? this.selectedPropertyId;
+        this.currentPropertyService.setSelectedProperty(this.selectedPropertyId);
         this.loadBookings();
       });
     });

@@ -30,6 +30,8 @@ public class User {
     private String billingProvider;
     private String subscriptionId;
     private String stripeAccountId;
+    private String iban;
+    private String swift;
 
     public enum SubscriptionTier {
         FREE,

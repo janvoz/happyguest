@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ApiService } from '../../core/api.service';
+import { ISO_COUNTRIES } from '../../shared/iso-countries';
 
 @Component({
   selector: 'app-registration',
@@ -13,7 +14,8 @@ export class RegistrationComponent {
   @Input() propertyId = '';
   @Output() registered = new EventEmitter<void>();
 
-  readonly countries = ['United States', 'United Kingdom', 'France', 'Germany', 'Spain', 'Italy', 'Croatia', 'Other'];
+  readonly countries = ISO_COUNTRIES;
+  filteredCountries = [...this.countries];
   readonly form: FormGroup;
   isSubmitting = false;
 
@@ -72,11 +74,19 @@ export class RegistrationComponent {
     return this.fb.group({
       fullName: ['', Validators.required],
       dateOfBirth: [null as Date | null, Validators.required],
-      citizenship: ['United States', Validators.required],
-      citizenshipOther: [''],
+      citizenship: ['US', Validators.required],
       documentNumber: ['', Validators.required],
       address: ['', Validators.required]
     });
+  }
+
+  filterCountries(query: string): void {
+    const normalized = (query ?? '').toLowerCase().trim();
+    this.filteredCountries = !normalized
+      ? [...this.countries]
+      : this.countries.filter((country) =>
+          country.name.toLowerCase().includes(normalized) || country.code.toLowerCase().includes(normalized)
+        );
   }
 
   private normalizeGuest(group: FormGroup): { fullName: string; dateOfBirth: string; citizenship: string; documentNumber: string; address: string } {
@@ -84,7 +94,7 @@ export class RegistrationComponent {
     return {
       fullName: String(value.fullName ?? ''),
       dateOfBirth: value.dateOfBirth instanceof Date ? value.dateOfBirth.toISOString() : '',
-      citizenship: value.citizenship === 'Other' ? String(value.citizenshipOther ?? '') : String(value.citizenship ?? ''),
+      citizenship: String(value.citizenship ?? ''),
       documentNumber: String(value.documentNumber ?? ''),
       address: String(value.address ?? '')
     };

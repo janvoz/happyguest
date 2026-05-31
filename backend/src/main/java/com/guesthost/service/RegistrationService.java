@@ -44,6 +44,7 @@ public class RegistrationService {
                     .citizenship(guest.getCitizenship())
                     .documentNumber(guest.getDocumentNumber())
                     .address(guest.getAddress())
+                    .ubyportStatus(GuestRegistration.UbyportStatus.PENDING)
                     .createdAt(Instant.now())
                     .build();
             saved.add(guestRegistrationRepository.save(registration));

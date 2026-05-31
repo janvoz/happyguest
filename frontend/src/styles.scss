@@ -13,3 +13,22 @@ $theme:   mat.define-light-theme((color: (primary: $primary, accent: $accent)));
 html, body { height: 100%; margin: 0; font-family: Roboto, sans-serif; }
 body { background: #f8fafc; color: #0f172a; }
 * { box-sizing: border-box; }
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-text-field-wrapper {
+  background-color: transparent !important;
+}
+
+.mat-mdc-form-field-infix {
+  padding-top: 0.7rem !important;
+  padding-bottom: 0.7rem !important;
+}
+
+.mdc-notched-outline__leading,
+.mdc-notched-outline__notch,
+.mdc-notched-outline__trailing {
+  border-color: rgb(148 163 184 / 0.7) !important;
+}

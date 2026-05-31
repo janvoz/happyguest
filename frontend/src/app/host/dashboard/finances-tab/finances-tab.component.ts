@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ApiService } from '../../../core/api.service';
+import { CurrentPropertyService } from '../../../core/current-property.service';
 import { Booking, MinibarOrder, Property } from '../../../shared/models';
 
 interface OrderRow extends MinibarOrder {
@@ -40,13 +41,16 @@ export class FinancesTabComponent implements OnInit {
 
   constructor(
     private readonly apiService: ApiService,
+    private readonly currentPropertyService: CurrentPropertyService,
     private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.apiService.getProperties().subscribe((properties) => {
+    this.currentPropertyService.properties$.subscribe((properties) => {
       this.properties = properties;
-      this.selectedPropertyId = properties[0]?.id ?? '';
+    });
+    this.currentPropertyService.selectedPropertyId$.subscribe((propertyId) => {
+      this.selectedPropertyId = propertyId;
       this.loadOrders();
     });
   }

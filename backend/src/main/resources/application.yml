@@ -33,3 +33,13 @@ app:
   mail:
     sender: ${MAIL_SENDER:${MAIL_USERNAME:}}
     sender-name: ${MAIL_SENDER_NAME:Message from Staclo.host}
+  subscription:
+    tiers:
+      FREE: []
+      STANDARD:
+        - CUSTOM_TEMPLATES
+      PRO:
+        - MINIBAR
+        - UBYPORT_SYNC
+        - CUSTOM_TEMPLATES
+        - INTERACTIVE_MAPS

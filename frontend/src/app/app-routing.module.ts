@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { AuthGuard } from './core/auth.guard';
+import { FeatureFlagGuard } from './core/feature-flag.guard';
 import { GuideDetailComponent } from './guest/guide-detail/guide-detail.component';
 import { GuestPortalComponent } from './guest/portal/guest-portal.component';
 import { ReviewComponent } from './guest/review/review.component';
@@ -14,6 +15,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  { path: 'dashboard/minibar', component: DashboardComponent, canActivate: [AuthGuard, FeatureFlagGuard], data: { requiredFeature: 'MINIBAR' } },
   { path: 'guest/portal/:propertyId', component: GuestPortalComponent },
   { path: 'guest/portal/:propertyId/guide/:slug', component: GuideDetailComponent },
   { path: 'guest/review/:bookingId', component: ReviewComponent },

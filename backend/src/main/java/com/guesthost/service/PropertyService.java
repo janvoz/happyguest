@@ -47,6 +47,8 @@ public class PropertyService {
                 .bookingReviewUrl(dto.getBookingReviewUrl())
                 .icalUrls(dto.getIcalUrls())
                 .checkoutChecklist(dto.getCheckoutChecklist())
+                .faqList(dto.getFaqList())
+                .mapMarkers(dto.getMapMarkers())
                 .customDomain(dto.getCustomDomain())
                 .build();
         return propertyRepository.save(property);
@@ -62,6 +64,8 @@ public class PropertyService {
         existing.setBookingReviewUrl(dto.getBookingReviewUrl());
         existing.setIcalUrls(dto.getIcalUrls());
         existing.setCheckoutChecklist(dto.getCheckoutChecklist());
+        existing.setFaqList(dto.getFaqList());
+        existing.setMapMarkers(dto.getMapMarkers());
         existing.setCustomDomain(dto.getCustomDomain());
         return propertyRepository.save(existing);
     }

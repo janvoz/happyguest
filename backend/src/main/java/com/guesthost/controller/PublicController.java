@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Locale;
+
 @RestController
 @RequiredArgsConstructor
 public class PublicController {
@@ -34,12 +36,12 @@ public class PublicController {
 
     @GetMapping("/api/public/properties/{propertyId}/bookings/{reference}")
     public ResponseEntity<Booking> getBookingByReference(@PathVariable String propertyId, @PathVariable String reference) {
-        Booking booking = bookingRepository.findById(reference)
+        String normalizedReference = reference.trim().toUpperCase(Locale.ROOT);
+        Booking booking = bookingRepository.findByPropertyIdAndBookingRefNumber(propertyId, normalizedReference)
                 .or(() -> bookingRepository.findAllByPropertyId(propertyId).stream()
-                        .filter(b -> reference.equals(b.getId()))
+                        .filter(b -> normalizedReference.equalsIgnoreCase(b.getId()))
                         .findFirst())
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + reference));
         return ResponseEntity.ok(booking);
     }
 }
-
