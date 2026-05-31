@@ -111,7 +111,7 @@
           <mat-card-title>Interactive Local Tips Map</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <app-map [markers]="property.mapMarkers"></app-map>
+          <app-map [markers]="property.mapMarkers || []"></app-map>
           <div class="mt-3 space-y-2">
             <div *ngFor="let marker of property.mapMarkers" class="rounded-xl border border-slate-200 p-3 text-sm">
               <div class="font-semibold">{{ marker.title }} <span class="text-slate-500">({{ marker.category }})</span></div>

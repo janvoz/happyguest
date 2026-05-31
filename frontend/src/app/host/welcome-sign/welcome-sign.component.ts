@@ -30,14 +30,14 @@ import { Property, PortalQrResponse } from '../../shared/models';
       </div>
 
       <div class="flex flex-col items-center gap-2">
-        <img *ngIf="qr?.qrDataUrl" [src]="qr.qrDataUrl" alt="Guest Portal QR" class="w-48 h-48" />
+        <img *ngIf="qr?.qrDataUrl" [src]="qr!.qrDataUrl" alt="Guest Portal QR" class="w-48 h-48" />
         <p class="text-sm text-gray-400 text-center">Scan for Guest Portal</p>
       </div>
     </div>
 
     <mat-divider class="w-full"></mat-divider>
 
-    <p *ngIf="qr?.portalUrl" class="text-xs text-gray-400 break-all text-center">{{ qr.portalUrl }}</p>
+    <p *ngIf="qr?.portalUrl" class="text-xs text-gray-400 break-all text-center">{{ qr!.portalUrl }}</p>
     <p class="text-xs text-gray-300 mt-auto">Powered by HappyGuest</p>
   </div>
 </div>
