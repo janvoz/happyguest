@@ -21,13 +21,13 @@ export class DashboardComponent implements OnInit {
   readonly navItems = [
     { label: 'Properties', icon: 'home_work', tabIndex: 0 },
     { label: 'Bookings', icon: 'event', tabIndex: 1 },
-    { label: 'Logbook', icon: 'description', tabIndex: 2 },
+    { label: 'Logbook', icon: 'description', tabIndex: 2, requiredFeature: 'LEGAL_LOGBOOK' },
     { label: 'Guides', icon: 'menu_book', tabIndex: 3 },
     { label: 'FAQ', icon: 'quiz', tabIndex: 4 },
     { label: 'Minibar', icon: 'local_bar', tabIndex: 5, requiredFeature: 'MINIBAR' },
-    { label: 'Templates', icon: 'mark_email_read', tabIndex: 6 },
+    { label: 'Templates', icon: 'mark_email_read', tabIndex: 6, requiredFeature: 'CUSTOM_TEMPLATES' },
     { label: 'Finances & Billing', icon: 'payments', tabIndex: 7 },
-    { label: 'Messages', icon: 'chat', tabIndex: 8, isGlobal: true }
+    { label: 'Messages', icon: 'chat', tabIndex: 8, isGlobal: true, requiredFeature: 'TWO_WAY_CHAT' }
   ];
   availableFeatures = new Set<string>();
   properties: Property[] = [];

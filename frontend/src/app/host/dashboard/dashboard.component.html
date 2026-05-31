@@ -60,7 +60,12 @@
           <div class="p-4"><app-bookings-tab></app-bookings-tab></div>
         </mat-tab>
         <mat-tab [label]="i18n.t('logbook')">
-          <div class="p-4"><app-logbook-tab></app-logbook-tab></div>
+          <div class="p-4">
+            <app-logbook-tab *ngIf="isFeatureEnabled('LEGAL_LOGBOOK')"></app-logbook-tab>
+            <mat-card *ngIf="!isFeatureEnabled('LEGAL_LOGBOOK')" class="rounded-2xl border border-dashed border-slate-300">
+              <mat-card-content class="p-6 text-sm text-slate-600">Legal logbook is available on STANDARD and PRO subscription tiers.</mat-card-content>
+            </mat-card>
+          </div>
         </mat-tab>
         <mat-tab [label]="i18n.t('guides')">
           <div class="p-4"><app-guides-tab></app-guides-tab></div>
@@ -77,13 +82,23 @@
           </div>
         </mat-tab>
         <mat-tab [label]="i18n.t('templates')">
-          <div class="p-4"><app-templates-tab></app-templates-tab></div>
+          <div class="p-4">
+            <app-templates-tab *ngIf="isFeatureEnabled('CUSTOM_TEMPLATES')"></app-templates-tab>
+            <mat-card *ngIf="!isFeatureEnabled('CUSTOM_TEMPLATES')" class="rounded-2xl border border-dashed border-slate-300">
+              <mat-card-content class="p-6 text-sm text-slate-600">Custom templates are available on STANDARD and PRO subscription tiers.</mat-card-content>
+            </mat-card>
+          </div>
         </mat-tab>
         <mat-tab [label]="i18n.t('finances')">
           <div class="p-4"><app-finances-tab></app-finances-tab></div>
         </mat-tab>
         <mat-tab [label]="i18n.t('messages')">
-          <div class="p-4"><app-messages-tab></app-messages-tab></div>
+          <div class="p-4">
+            <app-messages-tab *ngIf="isFeatureEnabled('TWO_WAY_CHAT')"></app-messages-tab>
+            <mat-card *ngIf="!isFeatureEnabled('TWO_WAY_CHAT')" class="rounded-2xl border border-dashed border-slate-300">
+              <mat-card-content class="p-6 text-sm text-slate-600">Two-way chat is available on STANDARD and PRO subscription tiers.</mat-card-content>
+            </mat-card>
+          </div>
         </mat-tab>
       </mat-tab-group>
     </div>

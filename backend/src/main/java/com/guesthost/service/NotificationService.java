@@ -58,10 +58,28 @@ public class NotificationService {
         for (Booking booking : bookingRepository.findAllByPostDepartureSentFalse()) {
             if (booking.getCheckOut() != null && booking.getCheckOut().isBefore(threshold) && hasGuestEmail(booking)) {
                 String link = frontendUrl + "/guest/review/" + booking.getId();
-                String body = "<html><body><h2>Thank you for your stay!</h2>"
+                String fallbackBody = "<html><body><h2>Thank you for your stay!</h2>"
                         + "<p>We would love to hear about your experience.</p>"
                         + "<p><a href=\"" + link + "\">Leave a Review</a></p></body></html>";
-                if (sendEmail(booking.getGuestEmail(), "Thank you for your stay!", body)) {
+                Property property = propertyRepository.findById(booking.getPropertyId()).orElse(null);
+
+                String subject = "Thank you for your stay!";
+                String htmlBody = fallbackBody;
+                if (property != null) {
+                    EmailTemplateRenderService.RenderedTemplate rendered = emailTemplateRenderService.resolveTemplate(
+                            property.getHostId(),
+                            property,
+                            booking,
+                            EmailTemplate.TriggerType.POST_DEPARTURE,
+                            subject,
+                            fallbackBody,
+                            link
+                    );
+                    subject = rendered.subject();
+                    htmlBody = rendered.htmlBody();
+                }
+
+                if (sendEmail(booking.getGuestEmail(), subject, htmlBody)) {
                     booking.setPostDepartureSent(true);
                     bookingRepository.save(booking);
                 }

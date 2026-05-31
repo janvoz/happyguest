@@ -36,6 +36,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/api/host/properties/{propertyId}/logbook")
+    @RequiresFeature("LEGAL_LOGBOOK")
     public ResponseEntity<List<GuestRegistration>> getLogbook(
             Authentication authentication,
             @PathVariable String propertyId,
@@ -46,6 +47,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/api/host/properties/{propertyId}/logbook/export")
+    @RequiresFeature("LEGAL_LOGBOOK")
     public ResponseEntity<byte[]> exportByProperty(
             Authentication authentication,
             @PathVariable String propertyId,
@@ -75,6 +77,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/api/host/logbook/export")
+    @RequiresFeature("LEGAL_LOGBOOK")
     public ResponseEntity<byte[]> export(
             Authentication authentication,
             @RequestParam String propertyId,

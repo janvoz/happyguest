@@ -15,17 +15,42 @@
       <mat-error>Subject is required.</mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>HTML Body</mat-label>
-      <textarea matInput rows="12" formControlName="htmlBody" class="font-mono text-sm"></textarea>
+    <div class="flex justify-end">
+      <button mat-stroked-button type="button" (click)="toggleSourceView()">
+        <mat-icon>{{ showSourceView ? 'visibility' : 'code' }}</mat-icon>
+        {{ showSourceView ? 'Visual editor' : 'Raw HTML source' }}
+      </button>
+    </div>
+
+    <div *ngIf="!showSourceView" class="rounded-2xl border border-slate-300 bg-white p-3">
+      <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Visual Editor</div>
+      <div #wysiwygEditor
+           class="min-h-[280px] rounded-xl border border-slate-200 bg-white p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+           contenteditable="true"
+           (input)="onEditorInput()"
+           (keyup)="captureEditorSelection()"
+           (mouseup)="captureEditorSelection()"
+           (focus)="captureEditorSelection()"></div>
+    </div>
+
+    <mat-form-field *ngIf="showSourceView" appearance="outline">
+      <mat-label>HTML Body Source</mat-label>
+      <textarea #sourceTextarea
+                matInput
+                rows="12"
+                formControlName="htmlBody"
+                class="font-mono text-sm"></textarea>
       <mat-error>HTML body is required.</mat-error>
     </mat-form-field>
 
     <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
       <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Placeholders</div>
-      <div class="flex flex-wrap gap-2">
-        <button *ngFor="let token of placeholders" mat-stroked-button type="button" (click)="appendPlaceholder(token)">{{ token }}</button>
-      </div>
+      <mat-chip-listbox>
+        <mat-chip-option *ngFor="let token of placeholders"
+                         [selectable]="false"
+                         [selected]="false"
+                         (click)="appendPlaceholder(token)">{{ token }}</mat-chip-option>
+      </mat-chip-listbox>
     </div>
   </form>
 </mat-dialog-content>
