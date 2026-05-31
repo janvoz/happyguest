@@ -1,6 +1,11 @@
 package com.guesthost.service;
 
 import com.guesthost.dto.MinibarOrderRequest;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.guesthost.exception.ResourceNotFoundException;
 import com.guesthost.model.Booking;
 import com.guesthost.model.MinibarOrder;
@@ -14,11 +19,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -82,7 +89,8 @@ public class OrderProcessingService {
                 .build();
         MinibarOrder saved = minibarOrderRepository.save(order);
         String spaydPayload = paymentMethod == MinibarOrder.PaymentMethod.QR_BANK ? buildSpaydPayload(saved) : "";
-        return new OrderResult(saved, paymentIntent.clientSecret(), spaydPayload);
+        String spaydQrDataUrl = spaydPayload.isBlank() ? "" : buildQrDataUrl(spaydPayload);
+        return new OrderResult(saved, paymentIntent.clientSecret(), spaydPayload, spaydQrDataUrl);
     }
 
     public MinibarOrder confirmOrder(String stripePaymentIntentId) {
@@ -113,7 +121,7 @@ public class OrderProcessingService {
         return VARIABLE_SYMBOL_DATE.format(now.atZone(ZoneOffset.UTC)) + bookingPart;
     }
 
-    public record OrderResult(MinibarOrder order, String clientSecret, String spaydPayload) {}
+    public record OrderResult(MinibarOrder order, String clientSecret, String spaydPayload, String spaydQrDataUrl) {}
 
     private MinibarOrder.PaymentMethod resolvePaymentMethod(String raw) {
         if (raw == null || raw.isBlank()) {
@@ -140,5 +148,17 @@ public class OrderProcessingService {
                 + "*AM:" + amount
                 + "*CC:CZK*X-VS:" + order.getVariableSymbol()
                 + "*MSG:Minibar " + order.getBookingId();
+    }
+
+    private String buildQrDataUrl(String payload) {
+        try {
+            BitMatrix matrix = new QRCodeWriter().encode(payload, BarcodeFormat.QR_CODE, 320, 320);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(matrix, "PNG", outputStream);
+            String base64 = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+            return "data:image/png;base64," + base64;
+        } catch (WriterException | java.io.IOException ex) {
+            throw new IllegalStateException("Failed to generate SPAYD QR code", ex);
+        }
     }
 }

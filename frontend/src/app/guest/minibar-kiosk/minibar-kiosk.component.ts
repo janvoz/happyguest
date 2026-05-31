@@ -19,6 +19,7 @@ export class MinibarKioskComponent implements OnChanges {
   isProcessing = false;
   paymentMethod: 'STRIPE' | 'QR_BANK' = 'STRIPE';
   spaydPayload = '';
+  spaydQrDataUrl = '';
 
   constructor(
     private readonly apiService: ApiService,
@@ -63,6 +64,7 @@ export class MinibarKioskComponent implements OnChanges {
       next: (response) => {
         this.isProcessing = false;
         this.spaydPayload = response.spaydPayload ?? '';
+        this.spaydQrDataUrl = response.spaydQrDataUrl ?? '';
         if (this.paymentMethod === 'QR_BANK') {
           this.paymentMessage = 'Bank QR generated. Scan and finish payment in your banking app.';
           this.snackBar.open('SPAYD QR prepared', 'Dismiss', { duration: 4000 });
@@ -80,8 +82,6 @@ export class MinibarKioskComponent implements OnChanges {
   }
 
   get spaydQrUrl(): string {
-    return this.spaydPayload
-      ? `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(this.spaydPayload)}`
-      : '';
+    return this.spaydQrDataUrl;
   }
 }

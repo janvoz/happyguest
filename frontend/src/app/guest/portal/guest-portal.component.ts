@@ -24,6 +24,7 @@ export class GuestPortalComponent implements OnInit {
   booking: Booking | null = null;
   showRegistrationForm = false;
   isLoading = true;
+  faqSearchTerm = '';
   selectedLanguage: 'en' | 'cs' | 'de' | 'pl' = 'en';
 
   constructor(
@@ -76,6 +77,21 @@ export class GuestPortalComponent implements OnInit {
     this.showRegistrationForm = false;
     if (this.booking) {
       this.booking = { ...this.booking, isRegistrationCompleted: true };
+    }
+
+    setLanguage(language: 'en' | 'cs' | 'de' | 'pl'): void {
+      this.selectedLanguage = language;
+    }
+
+    get filteredFaqList() {
+      const faqs = this.property?.faqList ?? [];
+      const term = this.faqSearchTerm.trim().toLowerCase();
+      if (!term) {
+        return faqs;
+      }
+      return faqs.filter((faq) =>
+        faq.question.toLowerCase().includes(term) || faq.answer.toLowerCase().includes(term)
+      );
     }
     this.snackBar.open('Registration completed. Your stay details are now unlocked.', 'Dismiss', { duration: 4000 });
   }

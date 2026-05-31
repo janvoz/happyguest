@@ -2,7 +2,6 @@ package com.guesthost.security;
 
 import com.guesthost.service.SubscriptionFeatureService;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,14 +16,23 @@ public class FeatureGateAspect {
 
     private final SubscriptionFeatureService subscriptionFeatureService;
 
-    @Before("@within(requiresFeature) || @annotation(requiresFeature)")
-    public void enforceFeature(JoinPoint joinPoint, RequiresFeature requiresFeature) {
+    @Before("@annotation(requiresFeature)")
+    public void enforceMethodFeature(RequiresFeature requiresFeature) {
+        enforceFeature(requiresFeature.value());
+    }
+
+    @Before("@within(requiresFeature)")
+    public void enforceClassFeature(RequiresFeature requiresFeature) {
+        enforceFeature(requiresFeature.value());
+    }
+
+    private void enforceFeature(String featureId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getName() == null) {
             throw new AccessDeniedException("Missing authentication for feature access");
         }
-        if (!subscriptionFeatureService.isEnabledForUser(authentication.getName(), requiresFeature.value())) {
-            throw new AccessDeniedException("Feature not enabled: " + requiresFeature.value());
+        if (!subscriptionFeatureService.isEnabledForUser(authentication.getName(), featureId)) {
+            throw new AccessDeniedException("Feature not enabled: " + featureId);
         }
     }
 }

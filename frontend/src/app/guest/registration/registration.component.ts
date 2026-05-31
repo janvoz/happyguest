@@ -91,9 +91,12 @@ export class RegistrationComponent {
 
   private normalizeGuest(group: FormGroup): { fullName: string; dateOfBirth: string; citizenship: string; documentNumber: string; address: string } {
     const value = group.getRawValue();
+    const date = value.dateOfBirth instanceof Date
+      ? `${value.dateOfBirth.getFullYear()}-${String(value.dateOfBirth.getMonth() + 1).padStart(2, '0')}-${String(value.dateOfBirth.getDate()).padStart(2, '0')}`
+      : '';
     return {
       fullName: String(value.fullName ?? ''),
-      dateOfBirth: value.dateOfBirth instanceof Date ? value.dateOfBirth.toISOString() : '',
+      dateOfBirth: date,
       citizenship: String(value.citizenship ?? ''),
       documentNumber: String(value.documentNumber ?? ''),
       address: String(value.address ?? '')

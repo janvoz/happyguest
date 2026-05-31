@@ -51,6 +51,7 @@ export interface EmailTemplateDto {
 export interface PaymentIntentResponse {
   clientSecret: string;
   spaydPayload?: string;
+  spaydQrDataUrl?: string;
 }
 
 export interface RegistrationInviteResponse {
