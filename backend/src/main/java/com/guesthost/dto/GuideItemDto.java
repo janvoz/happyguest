@@ -15,9 +15,11 @@ public class GuideItemDto {
 
     @NotBlank(message = "Title is required")
     private String title;
+    private String titleCs;
 
     private String slug;
     private String contentMarkdown;
+    private String contentMarkdownCs;
     private String videoUrl;
     private List<String> photoUrls = new ArrayList<>();
     private int displayOrder;

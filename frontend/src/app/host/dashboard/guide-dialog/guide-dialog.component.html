@@ -1,9 +1,14 @@
-<h2 mat-dialog-title>{{ data.guide ? 'Edit Guide' : 'Add Guide' }}</h2>
+<h2 mat-dialog-title>{{ data.guide ? i18n.t('editGuide') : i18n.t('addGuide') }}</h2>
 <mat-dialog-content>
   <form [formGroup]="form" class="mt-4 grid gap-4">
     <mat-form-field appearance="outline">
-      <mat-label>Title</mat-label>
+      <mat-label>{{ i18n.t('guideTitle') }}</mat-label>
       <input matInput formControlName="title">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ i18n.t('guideTitleCs') }}</mat-label>
+      <input matInput formControlName="titleCs">
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -12,8 +17,13 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Content (Markdown)</mat-label>
-      <textarea matInput rows="8" formControlName="contentMarkdown"></textarea>
+      <mat-label>{{ i18n.t('contentEn') }}</mat-label>
+      <textarea matInput rows="6" formControlName="contentMarkdown"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ i18n.t('contentCs') }}</mat-label>
+      <textarea matInput rows="6" formControlName="contentMarkdownCs"></textarea>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -25,9 +35,44 @@
       <mat-label>Display order</mat-label>
       <input matInput type="number" formControlName="displayOrder">
     </mat-form-field>
+
+    <!-- Media Upload with drag-and-drop -->
+    <div class="border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center gap-2 transition"
+         [class.border-indigo-400]="isDragOver"
+         [class.bg-indigo-50]="isDragOver"
+         (dragover)="onDragOver($event)"
+         (dragleave)="onDragLeave()"
+         (drop)="onDrop($event)">
+      <mat-icon class="!text-4xl text-slate-400">cloud_upload</mat-icon>
+      <p class="text-sm text-gray-500 text-center">Drag &amp; drop images (JPEG/PNG), PDFs, or MP4 videos here</p>
+      <p class="text-xs text-gray-400">or</p>
+      <label class="cursor-pointer">
+        <input type="file" class="hidden" accept="image/jpeg,image/png,.pdf,video/mp4" (change)="onFileSelected($event)">
+        <span mat-stroked-button class="mat-stroked-button cursor-pointer px-4 py-2 border rounded text-sm">
+          <mat-icon class="align-middle mr-1">attach_file</mat-icon>Choose file
+        </span>
+      </label>
+      <mat-progress-bar *ngIf="uploadingMedia" mode="indeterminate" class="w-full mt-2"></mat-progress-bar>
+      <p *ngIf="!data.guide?.id" class="text-xs text-amber-500 text-center">Save the guide first to enable media upload.</p>
+    </div>
+
+    <!-- Uploaded media list -->
+    <div *ngIf="uploadedUrls.length > 0" class="grid grid-cols-3 gap-2">
+      <div *ngFor="let url of uploadedUrls" class="relative group">
+        <img *ngIf="isImage(url)" [src]="url" class="w-full h-20 object-cover rounded" />
+        <video *ngIf="isVideo(url)" [src]="url" class="w-full h-20 object-cover rounded" muted></video>
+        <a *ngIf="isPdf(url)" [href]="url" target="_blank" class="flex items-center gap-1 p-2 bg-gray-100 rounded text-xs truncate text-indigo-700 hover:underline">
+          <mat-icon class="!text-base">picture_as_pdf</mat-icon>PDF
+        </a>
+        <button type="button" mat-icon-button class="absolute top-0 right-0 hidden group-hover:flex"
+                (click)="removeMedia(url)">
+          <mat-icon class="text-red-500 text-sm">close</mat-icon>
+        </button>
+      </div>
+    </div>
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close type="button">Cancel</button>
-  <button mat-flat-button color="primary" type="button" (click)="save()">Save Guide</button>
+  <button mat-button mat-dialog-close type="button">{{ i18n.t('cancel') }}</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">{{ i18n.t('save') }}</button>
 </mat-dialog-actions>

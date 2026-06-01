@@ -8,16 +8,28 @@
 
       <mat-nav-list class="!pt-2">
         <a mat-list-item *ngFor="let item of navItems" (click)="openTab(item.tabIndex)" class="!text-slate-200 hover:!bg-white/5" [class.hidden]="!isFeatureEnabled(item.requiredFeature)">
-          <mat-icon matListItemIcon class="!text-slate-200" [matBadge]="item.label === 'Messages' && unreadMessages ? unreadMessages : null" matBadgeColor="warn">{{ item.icon }}</mat-icon>
+          <mat-icon matListItemIcon class="!text-slate-200" [matBadge]="item.labelKey === 'messages' && unreadMessages ? unreadMessages : null" matBadgeColor="warn">{{ item.icon }}</mat-icon>
           <span matListItemTitle class="!text-slate-200">
-            {{ item.label }}
+            {{ i18n.t(item.labelKey) }}
             <span *ngIf="item.isGlobal" class="ml-1 text-[10px] uppercase tracking-wide text-slate-400">Global</span>
           </span>
         </a>
       </mat-nav-list>
 
-      <div class="mt-auto border-t border-white/10 px-6 py-5 text-sm text-slate-400">
-        Guest experience automation for modern hosts.
+      <div class="mt-auto border-t border-white/10 px-4 py-4 flex flex-col gap-2">
+        <!-- Language toggle -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+          <mat-label class="!text-slate-300">{{ i18n.t('language') }}</mat-label>
+          <mat-select [value]="i18n.currentLang" (selectionChange)="setHostLang($event.value)">
+            <mat-option value="en">{{ i18n.t('english') }}</mat-option>
+            <mat-option value="cs">{{ i18n.t('czech') }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <!-- Welcome sign button -->
+        <button mat-stroked-button class="!text-slate-200 !border-white/20" (click)="generateWelcomeSheetPdf()" [disabled]="!selectedPropertyId">
+          <mat-icon>print</mat-icon> {{ i18n.t('welcomeSign') }}
+        </button>
+        <p class="text-xs text-slate-400">Guest experience automation for modern hosts.</p>
       </div>
     </div>
   </mat-sidenav>
@@ -28,11 +40,11 @@
         <mat-icon>menu</mat-icon>
       </button>
       <div class="flex-1">
-        <div class="text-lg font-semibold">Host Dashboard</div>
+        <div class="text-lg font-semibold">{{ i18n.t('dashboard') }}</div>
         <div class="text-xs opacity-80">Operational control center for every stay</div>
       </div>
-      <mat-form-field class="w-full max-w-sm !text-white" subscriptSizing="dynamic">
-        <mat-label>Current property context</mat-label>
+      <mat-form-field appearance="outline" class="w-full max-w-sm !text-white" subscriptSizing="dynamic">
+        <mat-label>{{ i18n.t('property') }}</mat-label>
         <mat-select [value]="selectedPropertyId" (selectionChange)="setCurrentProperty($event.value)">
           <mat-option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</mat-option>
         </mat-select>
@@ -41,19 +53,27 @@
 
     <div class="p-4 sm:p-6">
       <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabIndex = $event" class="rounded-3xl bg-white p-2 shadow-sm">
-        <mat-tab label="Properties">
+        <mat-tab [label]="i18n.t('property')">
           <div class="p-4"><app-properties-tab></app-properties-tab></div>
         </mat-tab>
-        <mat-tab label="Bookings">
+        <mat-tab [label]="i18n.t('bookings')">
           <div class="p-4"><app-bookings-tab></app-bookings-tab></div>
         </mat-tab>
-        <mat-tab label="Logbook">
-          <div class="p-4"><app-logbook-tab></app-logbook-tab></div>
+        <mat-tab [label]="i18n.t('logbook')">
+          <div class="p-4">
+            <app-logbook-tab *ngIf="isFeatureEnabled('LEGAL_LOGBOOK')"></app-logbook-tab>
+            <mat-card *ngIf="!isFeatureEnabled('LEGAL_LOGBOOK')" class="rounded-2xl border border-dashed border-slate-300">
+              <mat-card-content class="p-6 text-sm text-slate-600">Legal logbook is available on STANDARD and PRO subscription tiers.</mat-card-content>
+            </mat-card>
+          </div>
         </mat-tab>
-        <mat-tab label="Guides">
+        <mat-tab [label]="i18n.t('guides')">
           <div class="p-4"><app-guides-tab></app-guides-tab></div>
         </mat-tab>
-        <mat-tab label="Minibar">
+        <mat-tab [label]="i18n.t('faq')">
+          <div class="p-4"><app-faq-tab></app-faq-tab></div>
+        </mat-tab>
+        <mat-tab [label]="i18n.t('minibar')">
           <div class="p-4">
             <app-minibar-tab *ngIf="isFeatureEnabled('MINIBAR')"></app-minibar-tab>
             <mat-card *ngIf="!isFeatureEnabled('MINIBAR')" class="rounded-2xl border border-dashed border-slate-300">
@@ -61,14 +81,24 @@
             </mat-card>
           </div>
         </mat-tab>
-        <mat-tab label="Templates">
-          <div class="p-4"><app-templates-tab></app-templates-tab></div>
+        <mat-tab [label]="i18n.t('templates')">
+          <div class="p-4">
+            <app-templates-tab *ngIf="isFeatureEnabled('CUSTOM_TEMPLATES')"></app-templates-tab>
+            <mat-card *ngIf="!isFeatureEnabled('CUSTOM_TEMPLATES')" class="rounded-2xl border border-dashed border-slate-300">
+              <mat-card-content class="p-6 text-sm text-slate-600">Custom templates are available on STANDARD and PRO subscription tiers.</mat-card-content>
+            </mat-card>
+          </div>
         </mat-tab>
-        <mat-tab label="Finances">
+        <mat-tab [label]="i18n.t('finances')">
           <div class="p-4"><app-finances-tab></app-finances-tab></div>
         </mat-tab>
-        <mat-tab label="Messages">
-          <div class="p-4"><app-messages-tab></app-messages-tab></div>
+        <mat-tab [label]="i18n.t('messages')">
+          <div class="p-4">
+            <app-messages-tab *ngIf="isFeatureEnabled('TWO_WAY_CHAT')"></app-messages-tab>
+            <mat-card *ngIf="!isFeatureEnabled('TWO_WAY_CHAT')" class="rounded-2xl border border-dashed border-slate-300">
+              <mat-card-content class="p-6 text-sm text-slate-600">Two-way chat is available on STANDARD and PRO subscription tiers.</mat-card-content>
+            </mat-card>
+          </div>
         </mat-tab>
       </mat-tab-group>
     </div>

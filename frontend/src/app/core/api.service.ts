@@ -5,6 +5,7 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   Booking,
+  ChatMessage,
   EmailTemplate,
   GuestMessage,
   GuestRegistration,
@@ -23,6 +24,7 @@ export interface GuestRegistrationDto {
   propertyId: string;
   guests: Array<Pick<GuestRegistration, 'fullName' | 'dateOfBirth' | 'citizenship' | 'documentNumber' | 'address'>>;
 }
+
 export interface ReviewDto {
   bookingId: string;
   rating: number;
@@ -38,7 +40,8 @@ export interface GuestMessageDto {
 export interface OrderDto {
   bookingId: string;
   propertyId: string;
-  items: Array<{ minibarItemId: string; quantity: number }>;
+  items: Array<{ itemId: string; quantity: number }>;
+  paymentMethod?: 'STRIPE' | 'QR_BANK';
 }
 export interface EmailTemplateDto {
   propertyId: string;
@@ -48,6 +51,8 @@ export interface EmailTemplateDto {
 }
 export interface PaymentIntentResponse {
   clientSecret: string;
+  spaydPayload?: string;
+  spaydQrDataUrl?: string;
 }
 
 export interface RegistrationInviteResponse {
@@ -63,6 +68,23 @@ export interface SubscriptionFeaturesResponse {
   features: string[];
 }
 
+export interface HostProfile {
+  email: string;
+  name: string;
+  iban: string;
+  swift: string;
+}
+
+export interface UbyportSubmitResponse {
+  status: string;
+  submittedCount: number;
+  message: string;
+}
+
+export interface TranslationBatchResponse {
+  translatedTexts: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,7 +93,7 @@ export class ApiService {
   private readonly hostUrl = `${this.baseUrl}/host`;
   private readonly guestUrl = `${this.baseUrl}/guest`;
   private readonly publicUrl = `${this.baseUrl}/public`;
-  private readonly billingUrl = `${this.baseUrl}/billing`;
+  private readonly billingUrl = `${this.baseUrl}/host/billing`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -83,8 +105,10 @@ export class ApiService {
     return this.http.get<Property>(`${this.hostUrl}/properties/${id}`);
   }
 
-  getPublicProperty(propertyId: string): Observable<Property> {
-    return this.http.get<Property>(`${this.publicUrl}/properties/${propertyId}`);
+  getPublicProperty(propertyId: string, lang?: string): Observable<Property> {
+    return this.http.get<Property>(`${this.publicUrl}/properties/${propertyId}`, {
+      params: lang ? { lang } : {}
+    });
   }
 
   createProperty(dto: PropertyDto): Observable<Property> {
@@ -111,6 +135,21 @@ export class ApiService {
     return this.http.get<Booking>(`${this.publicUrl}/properties/${propertyId}/bookings/${reference}`);
   }
 
+  getBookingByGate(propertyId: string, reference: string, lastName: string): Observable<Booking> {
+    return this.http.get<Booking>(`${this.publicUrl}/properties/${propertyId}/bookings/access`, {
+      params: {
+        reference,
+        lastName
+      }
+    });
+  }
+
+  getBookingByAccessToken(propertyId: string, token: string): Observable<Booking> {
+    return this.http.get<Booking>(`${this.publicUrl}/properties/${propertyId}/bookings/access-token`, {
+      params: { token }
+    });
+  }
+
   createBooking(dto: BookingDto): Observable<Booking> {
     return this.http.post<Booking>(`${this.hostUrl}/bookings`, dto);
   }
@@ -121,6 +160,10 @@ export class ApiService {
 
   updateBooking(id: string, dto: BookingDto): Observable<Booking> {
     return this.http.put<Booking>(`${this.hostUrl}/bookings/${id}`, dto);
+  }
+
+  deleteBooking(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.hostUrl}/bookings/${id}`);
   }
 
   getLogbook(propertyId: string, from?: string, to?: string): Observable<GuestRegistration[]> {
@@ -134,6 +177,29 @@ export class ApiService {
       params: this.buildDateParams(from, to),
       responseType: 'blob'
     });
+  }
+
+  exportUbyportXml(propertyId: string, from?: string, to?: string): Observable<Blob> {
+    return this.http.get(`${this.hostUrl}/properties/${propertyId}/logbook/export/ubyport`, {
+      params: this.buildDateParams(from, to),
+      responseType: 'blob'
+    });
+  }
+
+  submitUbyport(propertyId: string, from?: string, to?: string): Observable<UbyportSubmitResponse> {
+    return this.http.post<UbyportSubmitResponse>(
+      `${this.hostUrl}/properties/${propertyId}/logbook/ubyport/submit`,
+      {},
+      { params: this.buildDateParams(from, to) }
+    );
+  }
+
+  getProfile(): Observable<HostProfile> {
+    return this.http.get<HostProfile>(`${this.hostUrl}/profile`);
+  }
+
+  updateProfile(dto: Partial<HostProfile>): Observable<HostProfile> {
+    return this.http.put<HostProfile>(`${this.hostUrl}/profile`, dto);
   }
 
   getGuides(propertyId: string): Observable<GuideItem[]> {
@@ -152,12 +218,16 @@ export class ApiService {
     return this.http.delete<void>(`${this.hostUrl}/guides/${id}`);
   }
 
-  getPublicGuides(propertyId: string): Observable<GuideItem[]> {
-    return this.http.get<GuideItem[]>(`${this.publicUrl}/properties/${propertyId}/guides`);
+  getPublicGuides(propertyId: string, lang?: string): Observable<GuideItem[]> {
+    return this.http.get<GuideItem[]>(`${this.publicUrl}/properties/${propertyId}/guides`, {
+      params: lang ? { lang } : {}
+    });
   }
 
-  getPublicGuide(propertyId: string, slug: string): Observable<GuideItem> {
-    return this.http.get<GuideItem>(`${this.publicUrl}/properties/${propertyId}/guides/${slug}`);
+  getPublicGuide(propertyId: string, slug: string, lang?: string): Observable<GuideItem> {
+    return this.http.get<GuideItem>(`${this.publicUrl}/properties/${propertyId}/guides/${slug}`, {
+      params: lang ? { lang } : {}
+    });
   }
 
   getMinibarItems(propertyId: string): Observable<MinibarItem[]> {
@@ -188,6 +258,22 @@ export class ApiService {
     return this.http.post<PaymentIntentResponse>(`${this.guestUrl}/orders`, dto);
   }
 
+  getPublicChat(bookingId: string): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.publicUrl}/bookings/${bookingId}/chat`);
+  }
+
+  getHostChat(bookingId: string): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.hostUrl}/bookings/${bookingId}/chat`);
+  }
+
+  sendGuestChatMessage(bookingId: string, messageText: string): Observable<ChatMessage> {
+    return this.http.post<ChatMessage>(`${this.publicUrl}/bookings/${bookingId}/chat`, { bookingId, messageText });
+  }
+
+  sendHostChatMessage(bookingId: string, messageText: string): Observable<ChatMessage> {
+    return this.http.post<ChatMessage>(`${this.hostUrl}/bookings/${bookingId}/chat`, { bookingId, messageText });
+  }
+
   getMessages(propertyId: string): Observable<GuestMessage[]> {
     return this.http.get<GuestMessage[]>(`${this.hostUrl}/properties/${propertyId}/messages`);
   }
@@ -209,9 +295,16 @@ export class ApiService {
   }
 
   translate(text: string, lang: string): Observable<string> {
-    return this.http.post<{ translatedText?: string } | string>(`${this.guestUrl}/translate`, { text, lang }).pipe(
+    return this.http.post<{ translatedText?: string } | string>(`${this.guestUrl}/translate`, { text, targetLanguage: lang }).pipe(
       map((response) => typeof response === 'string' ? response : response.translatedText ?? text)
     );
+  }
+
+  translateBatch(texts: string[], lang: string): Observable<string[]> {
+    return this.http.post<TranslationBatchResponse>(`${this.publicUrl}/translate/batch`, {
+      texts,
+      targetLanguage: lang
+    }).pipe(map((response) => response.translatedTexts ?? texts));
   }
 
   subscribePlan(tier: 'FREE' | 'STANDARD' | 'PRO'): Observable<string> {
@@ -244,6 +337,40 @@ export class ApiService {
 
   deleteTemplate(id: string): Observable<void> {
     return this.http.delete<void>(`${this.hostUrl}/templates/${id}`);
+  }
+
+  getFaq(propertyId: string): Observable<import('../shared/models').PropertyFaqItem[]> {
+    return this.http.get<import('../shared/models').PropertyFaqItem[]>(`${this.hostUrl}/properties/${propertyId}/faq`);
+  }
+
+  addFaqItem(propertyId: string, item: import('../shared/models').PropertyFaqItem): Observable<import('../shared/models').PropertyFaqItem[]> {
+    return this.http.post<import('../shared/models').PropertyFaqItem[]>(`${this.hostUrl}/properties/${propertyId}/faq`, item);
+  }
+
+  updateFaqItem(propertyId: string, index: number, item: import('../shared/models').PropertyFaqItem): Observable<import('../shared/models').PropertyFaqItem[]> {
+    return this.http.put<import('../shared/models').PropertyFaqItem[]>(`${this.hostUrl}/properties/${propertyId}/faq/${index}`, item);
+  }
+
+  deleteFaqItem(propertyId: string, index: number): Observable<void> {
+    return this.http.delete<void>(`${this.hostUrl}/properties/${propertyId}/faq/${index}`);
+  }
+
+  replaceFaqList(propertyId: string, list: import('../shared/models').PropertyFaqItem[]): Observable<import('../shared/models').PropertyFaqItem[]> {
+    return this.http.put<import('../shared/models').PropertyFaqItem[]>(`${this.hostUrl}/properties/${propertyId}/faq`, list);
+  }
+
+  uploadGuideMedia(guideId: string, file: File): Observable<{ url: string }> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<{ url: string }>(`${this.hostUrl}/guides/${guideId}/media`, form);
+  }
+
+  getPortalQr(propertyId: string): Observable<import('../shared/models').PortalQrResponse> {
+    return this.http.get<import('../shared/models').PortalQrResponse>(`${this.hostUrl}/properties/${propertyId}/portal-qr`);
+  }
+
+  downloadWelcomeSheetPdf(propertyId: string): Observable<Blob> {
+    return this.http.get(`${this.hostUrl}/properties/${propertyId}/welcome-sheet.pdf`, { responseType: 'blob' });
   }
 
   private buildDateParams(from?: string, to?: string): Record<string, string> {

@@ -44,8 +44,17 @@
           <span>Total</span>
           <span>{{ totalAmount | currency }}</span>
         </div>
-        <!-- TODO: integrate @stripe/stripe-js here -->
-        <div class="rounded-2xl bg-indigo-50 p-4 text-sm text-indigo-700">A hosted checkout flow will be displayed here after Stripe Elements integration.</div>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Payment method</mat-label>
+          <mat-select [(value)]="paymentMethod">
+            <mat-option value="STRIPE">Card (Stripe)</mat-option>
+            <mat-option value="QR_BANK">Bank QR (SPAYD)</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div *ngIf="spaydQrUrl" class="rounded-2xl bg-slate-50 p-4 text-center">
+          <div class="mb-2 text-sm text-slate-600">Scan this QR in your banking app</div>
+          <img [src]="spaydQrUrl" alt="SPAYD QR" class="mx-auto h-56 w-56">
+        </div>
       </mat-card-content>
       <mat-card-actions align="end">
         <button mat-button type="button" (click)="showCheckout = false">Cancel</button>

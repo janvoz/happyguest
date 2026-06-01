@@ -9,6 +9,7 @@ import com.guesthost.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +26,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final PropertyService propertyService;
     private final NotificationService notificationService;
+    private final ChannelSyncService channelSyncService;
 
     public List<Booking> getBookingsForProperty(String hostEmail, String propertyId) {
         propertyService.getOwnedProperty(hostEmail, propertyId);
@@ -45,16 +47,21 @@ public class BookingService {
                 .propertyId(property.getId())
                 .guestName(dto.getGuestName())
                 .guestEmail(dto.getGuestEmail())
+                .guestPhone(dto.getGuestPhone())
                 .checkIn(dto.getCheckIn())
                 .checkOut(dto.getCheckOut())
+                .totalPrice(resolveTotalPrice(dto.getTotalPrice()))
                 .doorCode(generateDoorCode())
                 .preArrivalSent(false)
                 .postDepartureSent(false)
                 .registrationCompleted(false)
                 .bookingRefNumber(resolveBookingReference(dto.getBookingRefNumber(), dto.getCheckIn()))
                 .source(resolveSource(dto.getSource()))
+                .channelStatus(resolveChannelStatus(dto.getChannelStatus(), Booking.ChannelStatus.CONFIRMED))
                 .build();
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+        channelSyncService.syncManualBookingChange(saved);
+        return saved;
     }
 
     public Booking updateBooking(String hostEmail, String bookingId, BookingDto dto) {
@@ -62,20 +69,26 @@ public class BookingService {
         validateDates(dto.getCheckIn(), dto.getCheckOut());
         existing.setGuestName(dto.getGuestName());
         existing.setGuestEmail(dto.getGuestEmail());
+        existing.setGuestPhone(dto.getGuestPhone());
         existing.setCheckIn(dto.getCheckIn());
         existing.setCheckOut(dto.getCheckOut());
+        existing.setTotalPrice(resolveTotalPrice(dto.getTotalPrice()));
         if (dto.getBookingRefNumber() != null && !dto.getBookingRefNumber().isBlank()) {
             existing.setBookingRefNumber(resolveBookingReference(dto.getBookingRefNumber(), dto.getCheckIn()));
         }
         if (dto.getSource() != null && !dto.getSource().isBlank()) {
             existing.setSource(resolveSource(dto.getSource()));
         }
-        return bookingRepository.save(existing);
+        existing.setChannelStatus(resolveChannelStatus(dto.getChannelStatus(), existing.getChannelStatus()));
+        Booking saved = bookingRepository.save(existing);
+        channelSyncService.syncManualBookingChange(saved);
+        return saved;
     }
 
     public void deleteBooking(String hostEmail, String bookingId) {
         Booking booking = getBooking(hostEmail, bookingId);
         bookingRepository.delete(booking);
+        channelSyncService.syncManualBookingCancellation(booking);
     }
 
     public Booking createImportedBooking(Property property, String guestName, String guestEmail,
@@ -87,14 +100,17 @@ public class BookingService {
                 .propertyId(property.getId())
                 .guestName(guestName)
                 .guestEmail(guestEmail)
+                .guestPhone("")
                 .checkIn(checkIn)
                 .checkOut(checkOut)
+                .totalPrice(BigDecimal.ZERO)
                 .doorCode(generateDoorCode())
                 .preArrivalSent(false)
                 .postDepartureSent(false)
                 .registrationCompleted(false)
                 .bookingRefNumber(resolveBookingReference(null, checkIn))
                 .source(resolveSource(source))
+                .channelStatus(Booking.ChannelStatus.CONFIRMED)
                 .build();
         return bookingRepository.save(booking);
     }
@@ -116,7 +132,26 @@ public class BookingService {
         if (source == null || source.isBlank()) {
             return Booking.BookingSource.MANUAL;
         }
-        return Booking.BookingSource.valueOf(source.trim().toUpperCase(Locale.ROOT));
+        try {
+            return Booking.BookingSource.valueOf(source.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ignored) {
+            return Booking.BookingSource.MANUAL;
+        }
+    }
+
+    private BigDecimal resolveTotalPrice(BigDecimal totalPrice) {
+        return totalPrice == null ? BigDecimal.ZERO : totalPrice.max(BigDecimal.ZERO);
+    }
+
+    private Booking.ChannelStatus resolveChannelStatus(String status, Booking.ChannelStatus fallback) {
+        if (status == null || status.isBlank()) {
+            return fallback == null ? Booking.ChannelStatus.CONFIRMED : fallback;
+        }
+        try {
+            return Booking.ChannelStatus.valueOf(status.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ignored) {
+            return fallback == null ? Booking.ChannelStatus.CONFIRMED : fallback;
+        }
     }
 
     private void validateDates(LocalDateTime checkIn, LocalDateTime checkOut) {

@@ -3,6 +3,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 import { ApiService } from '../../core/api.service';
+import { GuestI18nService, GuestLang } from '../../core/guest-i18n.service';
 import { GuideItem } from '../../shared/models';
 
 @Component({
@@ -12,16 +13,15 @@ import { GuideItem } from '../../shared/models';
 export class GuideDetailComponent implements OnInit {
   readonly languages = [
     { label: 'English', value: 'en' },
-    { label: 'French', value: 'fr' },
     { label: 'German', value: 'de' },
-    { label: 'Spanish', value: 'es' },
-    { label: 'Italian', value: 'it' }
+    { label: 'Čeština', value: 'cs' },
+    { label: 'Polski', value: 'pl' }
   ];
 
   propertyId = '';
   slug = '';
   guide: GuideItem | null = null;
-  selectedLanguage = 'en';
+  selectedLanguage: GuestLang = 'en';
   renderedContent = '';
   embedUrl: SafeResourceUrl | null = null;
   videoKind: 'youtube' | 'vimeo' | 'mp4' | 'unknown' = 'unknown';
@@ -29,30 +29,28 @@ export class GuideDetailComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly apiService: ApiService,
-    private readonly sanitizer: DomSanitizer
+    private readonly sanitizer: DomSanitizer,
+    readonly i18n: GuestI18nService
   ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
       this.propertyId = params.get('propertyId') ?? '';
       this.slug = params.get('slug') ?? '';
+      const requested = this.route.snapshot.queryParamMap.get('lang') ?? this.i18n.initializeFromBrowserLanguage();
+      this.selectedLanguage = (['en', 'cs', 'de', 'pl'].includes(requested) ? requested : 'en') as GuestLang;
+      this.i18n.setLanguage(this.selectedLanguage);
       this.loadGuide();
     });
   }
 
   translate(): void {
-    if (!this.guide || this.selectedLanguage === 'en') {
-      this.renderedContent = this.renderMarkdown(this.guide?.contentMarkdown ?? '');
-      return;
-    }
-
-    this.apiService.translate(this.guide.contentMarkdown, this.selectedLanguage).subscribe((translated) => {
-      this.renderedContent = this.renderMarkdown(translated);
-    });
+    this.i18n.setLanguage(this.selectedLanguage);
+    this.loadGuide();
   }
 
   private loadGuide(): void {
-    this.apiService.getPublicGuide(this.propertyId, this.slug).subscribe((guide) => {
+    this.apiService.getPublicGuide(this.propertyId, this.slug, this.selectedLanguage).subscribe((guide) => {
       this.guide = guide;
       this.videoKind = this.detectVideoKind(guide.videoUrl);
       this.embedUrl = this.buildEmbedUrl(guide.videoUrl);

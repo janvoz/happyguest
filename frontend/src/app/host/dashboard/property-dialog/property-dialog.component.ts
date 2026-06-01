@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatChipInputEvent } from '@angular/material/chips';
 
-import { Property } from '../../../shared/models';
+import { Property, PropertyMapMarker, PropertyQuickContact } from '../../../shared/models';
 
 @Component({
   selector: 'app-property-dialog',
@@ -15,9 +15,15 @@ export class PropertyDialogComponent {
   readonly form: FormGroup;
   icalUrls: string[];
   checkoutChecklist: string[];
+  mapMarkers: PropertyMapMarker[];
+  quickContacts: PropertyQuickContact[];
 
   get basicsGroup(): FormGroup {
     return this.form.controls['basics'] as FormGroup;
+  }
+
+  get listsGroup(): FormGroup {
+    return this.form.controls['lists'] as FormGroup;
   }
 
   constructor(
@@ -35,12 +41,13 @@ export class PropertyDialogComponent {
         bookingReviewUrl: [this.data?.bookingReviewUrl ?? '']
       }),
       lists: this.fb.group({
-        icalInput: [''],
-        checklistInput: ['']
+        faqJson: [JSON.stringify(this.data?.faqList ?? [], null, 2)]
       })
     });
     this.icalUrls = [...(this.data?.icalUrls ?? [])];
     this.checkoutChecklist = [...(this.data?.checkoutChecklist ?? [])];
+    this.mapMarkers = (this.data?.mapMarkers ?? []).map((m) => ({ ...m }));
+    this.quickContacts = (this.data?.quickContacts ?? []).map((c) => ({ ...c }));
   }
 
   addIcal(event: MatChipInputEvent): void {
@@ -52,7 +59,7 @@ export class PropertyDialogComponent {
   }
 
   removeIcal(index: number): void {
-    this.icalUrls = this.icalUrls.filter((_, currentIndex) => currentIndex !== index);
+    this.icalUrls = this.icalUrls.filter((_, i) => i !== index);
   }
 
   addChecklist(event: MatChipInputEvent): void {
@@ -64,7 +71,26 @@ export class PropertyDialogComponent {
   }
 
   removeChecklist(index: number): void {
-    this.checkoutChecklist = this.checkoutChecklist.filter((_, currentIndex) => currentIndex !== index);
+    this.checkoutChecklist = this.checkoutChecklist.filter((_, i) => i !== index);
+  }
+
+  addMarker(): void {
+    this.mapMarkers = [
+      ...this.mapMarkers,
+      { title: '', category: 'Restaurants', description: '', latitude: 0, longitude: 0 }
+    ];
+  }
+
+  removeMarker(index: number): void {
+    this.mapMarkers = this.mapMarkers.filter((_, i) => i !== index);
+  }
+
+  addContact(): void {
+    this.quickContacts = [...this.quickContacts, { label: 'Host Mobile', phone: '' }];
+  }
+
+  removeContact(index: number): void {
+    this.quickContacts = this.quickContacts.filter((_, i) => i !== index);
   }
 
   save(): void {
@@ -74,6 +100,7 @@ export class PropertyDialogComponent {
     }
 
     const basics = this.basicsGroup.getRawValue();
+    const lists = this.listsGroup.getRawValue();
     this.dialogRef.close({
       name: basics.name,
       address: basics.address,
@@ -82,7 +109,19 @@ export class PropertyDialogComponent {
       airbnbReviewUrl: basics.airbnbReviewUrl,
       bookingReviewUrl: basics.bookingReviewUrl,
       icalUrls: this.icalUrls,
-      checkoutChecklist: this.checkoutChecklist
+      checkoutChecklist: this.checkoutChecklist,
+      faqList: this.parseJsonArray(lists.faqJson),
+      mapMarkers: this.mapMarkers.filter((m) => m.title.trim()),
+      quickContacts: this.quickContacts.filter((c) => c.label && c.phone.trim())
     });
+  }
+
+  private parseJsonArray(raw: string): unknown[] {
+    try {
+      const parsed = JSON.parse(raw ?? '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 }

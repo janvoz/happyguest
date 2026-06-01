@@ -21,4 +21,5 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
     @Query("{ 'propertyId': ?0, 'checkIn': ?1 }")
     Optional<Booking> findByPropertyIdAndCheckIn(String propertyId, LocalDateTime checkIn);
     Optional<Booking> findByPropertyIdAndBookingRefNumber(String propertyId, String bookingRefNumber);
+    Optional<Booking> findByPropertyIdAndSourceAndExternalReservationId(String propertyId, Booking.BookingSource source, String externalReservationId);
 }

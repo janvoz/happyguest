@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
+import { Subject, takeUntil } from 'rxjs';
 
 import { ApiService, BookingDto } from '../../../core/api.service';
 import { CurrentPropertyService } from '../../../core/current-property.service';
@@ -12,13 +13,14 @@ import { BookingDialogComponent } from '../booking-dialog/booking-dialog.compone
   selector: 'app-bookings-tab',
   templateUrl: './bookings-tab.component.html'
 })
-export class BookingsTabComponent implements OnInit {
+export class BookingsTabComponent implements OnInit, OnDestroy {
   readonly displayedColumns = ['guestName', 'guestEmail', 'checkIn', 'checkOut', 'doorCode', 'status', 'actions'];
   readonly dataSource = new MatTableDataSource<Booking>([]);
   properties: Property[] = [];
   selectedPropertyId = '';
   isLoading = false;
   readonly inviteInProgress = new Set<string>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly apiService: ApiService,
@@ -28,13 +30,18 @@ export class BookingsTabComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentPropertyService.properties$.subscribe((properties) => {
+    this.currentPropertyService.properties$.pipe(takeUntil(this.destroy$)).subscribe((properties) => {
       this.properties = properties;
     });
-    this.currentPropertyService.selectedPropertyId$.subscribe((propertyId) => {
+    this.currentPropertyService.selectedPropertyId$.pipe(takeUntil(this.destroy$)).subscribe((propertyId) => {
       this.selectedPropertyId = propertyId;
       this.loadBookings();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadBookings(): void {
@@ -55,10 +62,10 @@ export class BookingsTabComponent implements OnInit {
     });
   }
 
-  openDialog(): void {
+  openDialog(booking?: Booking): void {
     const dialogRef = this.dialog.open(BookingDialogComponent, {
       width: '620px',
-      data: { properties: this.properties, propertyId: this.selectedPropertyId }
+      data: { properties: this.properties, propertyId: this.selectedPropertyId, booking }
     });
 
     dialogRef.afterClosed().subscribe((result: BookingDto | undefined) => {
@@ -66,12 +73,26 @@ export class BookingsTabComponent implements OnInit {
         return;
       }
 
-      this.apiService.createBooking(result).subscribe(() => {
-        this.snackBar.open('Booking created.', 'Dismiss', { duration: 3000 });
+      const request = booking
+        ? this.apiService.updateBooking(booking.id, result)
+        : this.apiService.createBooking(result);
+
+      request.subscribe(() => {
+        this.snackBar.open(booking ? 'Booking updated.' : 'Booking created.', 'Dismiss', { duration: 3000 });
         this.selectedPropertyId = result.propertyId ?? this.selectedPropertyId;
         this.currentPropertyService.setSelectedProperty(this.selectedPropertyId);
         this.loadBookings();
       });
+    });
+  }
+
+  deleteBooking(booking: Booking): void {
+    if (!confirm(`Delete booking for ${booking.guestName}?`)) {
+      return;
+    }
+    this.apiService.deleteBooking(booking.id).subscribe(() => {
+      this.snackBar.open('Booking deleted.', 'Dismiss', { duration: 3000 });
+      this.loadBookings();
     });
   }
 

@@ -52,12 +52,15 @@ public class GuideController {
     }
 
     @GetMapping("/api/public/properties/{propertyId}/guides")
-    public ResponseEntity<List<GuideItem>> getPublicGuides(@PathVariable String propertyId) {
-        return ResponseEntity.ok(guideService.getPublicGuides(propertyId));
+    public ResponseEntity<List<GuideItem>> getPublicGuides(@PathVariable String propertyId,
+                                                           @RequestParam(required = false) String lang) {
+        return ResponseEntity.ok(guideService.getPublicGuides(propertyId, lang));
     }
 
     @GetMapping("/api/public/properties/{propertyId}/guides/{slug}")
-    public ResponseEntity<GuideItem> getPublicGuide(@PathVariable String propertyId, @PathVariable String slug) {
-        return ResponseEntity.ok(guideService.getPublicGuideBySlug(propertyId, slug));
+    public ResponseEntity<GuideItem> getPublicGuide(@PathVariable String propertyId,
+                                                    @PathVariable String slug,
+                                                    @RequestParam(required = false) String lang) {
+        return ResponseEntity.ok(guideService.getPublicGuideBySlug(propertyId, slug, lang));
     }
 }

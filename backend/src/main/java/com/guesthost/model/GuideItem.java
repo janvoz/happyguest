@@ -22,6 +22,7 @@ public class GuideItem {
 
     private String propertyId;
     private String title;
+    private String titleCs;
     private String slug;
     private String contentMarkdown;
     private String videoUrl;
@@ -31,4 +32,7 @@ public class GuideItem {
     private List<String> photoUrls = new ArrayList<>();
 
     private int displayOrder;
+
+    /** Czech-language version of the guide content (optional). */
+    private String contentMarkdownCs;
 }

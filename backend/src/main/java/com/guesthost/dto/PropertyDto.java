@@ -23,5 +23,6 @@ public class PropertyDto {
     private List<String> checkoutChecklist = new ArrayList<>();
     private List<Property.FaqItem> faqList = new ArrayList<>();
     private List<Property.MapMarker> mapMarkers = new ArrayList<>();
+    private List<Property.QuickContact> quickContacts = new ArrayList<>();
     private String customDomain;
 }

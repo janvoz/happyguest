@@ -5,6 +5,10 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/guesthost}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 52MB
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -21,6 +25,8 @@ app:
   jwt:
     secret: ${JWT_SECRET:changeme-super-secret-key-at-least-32-chars}
     expiration-ms: 86400000
+  guest-access:
+    expiration-ms: ${GUEST_ACCESS_EXPIRATION_MS:1209600000}
   frontend-url: ${FRONTEND_URL:http://localhost:4200}
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:}
@@ -30,6 +36,12 @@ app:
     translate-api-key: ${GOOGLE_TRANSLATE_API_KEY:}
   fastspring:
     webhook-secret: ${FASTSPRING_WEBHOOK_SECRET:}
+  airbnb:
+    base-url: ${AIRBNB_API_BASE_URL:}
+    api-token: ${AIRBNB_API_TOKEN:}
+  booking:
+    base-url: ${BOOKING_API_BASE_URL:}
+    api-token: ${BOOKING_API_TOKEN:}
   mail:
     sender: ${MAIL_SENDER:${MAIL_USERNAME:}}
     sender-name: ${MAIL_SENDER_NAME:Message from Staclo.host}
@@ -38,8 +50,15 @@ app:
       FREE: []
       STANDARD:
         - CUSTOM_TEMPLATES
+        - FAQ_MANAGER
+        - TWO_WAY_CHAT
+        - LEGAL_LOGBOOK
       PRO:
         - MINIBAR
         - UBYPORT_SYNC
         - CUSTOM_TEMPLATES
         - INTERACTIVE_MAPS
+        - VIDEO_GUIDES
+        - LEGAL_LOGBOOK
+        - FAQ_MANAGER
+        - TWO_WAY_CHAT

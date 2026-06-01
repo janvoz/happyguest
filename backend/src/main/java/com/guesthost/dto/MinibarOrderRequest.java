@@ -19,4 +19,6 @@ public class MinibarOrderRequest {
     @Valid
     @NotEmpty(message = "At least one order item is required")
     private List<OrderLineDto> items = new ArrayList<>();
+
+    private String paymentMethod;
 }

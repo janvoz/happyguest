@@ -9,6 +9,7 @@ import { GuideDetailComponent } from './guest/guide-detail/guide-detail.componen
 import { GuestPortalComponent } from './guest/portal/guest-portal.component';
 import { ReviewComponent } from './guest/review/review.component';
 import { DashboardComponent } from './host/dashboard/dashboard.component';
+import { WelcomeSignComponent } from './host/welcome-sign/welcome-sign.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { path: 'dashboard/minibar', component: DashboardComponent, canActivate: [AuthGuard, FeatureFlagGuard], data: { requiredFeature: 'MINIBAR' } },
+  { path: 'host/welcome-sign/:propertyId', component: WelcomeSignComponent, canActivate: [AuthGuard] },
   { path: 'guest/portal/:propertyId', component: GuestPortalComponent },
   { path: 'guest/portal/:propertyId/guide/:slug', component: GuideDetailComponent },
   { path: 'guest/review/:bookingId', component: ReviewComponent },

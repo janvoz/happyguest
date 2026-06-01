@@ -43,6 +43,6 @@ public class BillingController {
         BillingService billingService = billingServiceFactory.selectProvider(
                 billingProvider == null ? user.getBillingProvider() : billingProvider
         );
-        return ResponseEntity.ok(Map.of("portalUrl", billingService.createPortalSession(user.getId())));
+        return ResponseEntity.ok(Map.of("url", billingService.createPortalSession(user.getId())));
     }
 }
